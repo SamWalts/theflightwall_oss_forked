@@ -103,6 +103,8 @@ void loop()
             Serial.println(f.ident_iata);
             Serial.print("Airline: ");
             Serial.println(f.airline_display_name_full);
+            Serial.print("Airline Logo URL: ");
+            Serial.println(f.airline_logo_url);
             Serial.print("Aircraft: ");
             Serial.println(f.aircraft_display_name_short.length() ? f.aircraft_display_name_short : f.aircraft_code);
             Serial.print("Operator Code: ");

@@ -10,6 +10,7 @@ Outputs: Visual output to LED matrix using FastLED.
 */
 #include "adapters/NeoMatrixDisplay.h"
 
+#include <ctype.h>
 #include <Adafruit_GFX.h>
 #include <FastLED_NeoMatrix.h>
 #include <FastLED.h>
@@ -121,6 +122,36 @@ String NeoMatrixDisplay::truncateToColumns(const String &text, int maxColumns)
     return text.substring(0, maxColumns - 3) + String("...");
 }
 
+String NeoMatrixDisplay::makeAirlineLogoBadgeText(const FlightInfo &f)
+{
+    String badge = f.operator_iata.length() ? f.operator_iata
+                                            : (f.operator_icao.length() ? f.operator_icao : f.operator_code);
+    badge.trim();
+    badge.toUpperCase();
+
+    if (badge.length() == 0)
+    {
+        for (size_t i = 0; i < (size_t)f.airline_display_name_full.length() && badge.length() < 3; ++i)
+        {
+            char c = f.airline_display_name_full[i];
+            if (isalpha((unsigned char)c))
+            {
+                badge += (char)toupper((unsigned char)c);
+            }
+        }
+    }
+
+    if (badge.length() == 0)
+    {
+        badge = String("AIR");
+    }
+    if (badge.length() > 3)
+    {
+        badge = badge.substring(0, 3);
+    }
+    return badge;
+}
+
 void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
 {
     // Border
@@ -136,6 +167,8 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
     const int innerWidth = _matrixWidth - 2 - (2 * padding); // Account for border and padding
     const int innerHeight = _matrixHeight - 2 - (2 * padding);
     const int maxCols = innerWidth / charWidth;
+    const bool hasAirlineLogo = f.airline_logo_url.length() > 0;
+    const int logoBadgeWidth = 22;
 
     // Lines per display:
     // 1: airline
@@ -151,7 +184,18 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
 
     String line3 = f.aircraft_display_name_short.length() ? f.aircraft_display_name_short : f.aircraft_code;
 
-    String line1 = truncateToColumns(airline, maxCols);
+    int line1MaxCols = maxCols;
+    if (hasAirlineLogo)
+    {
+        const int reservedCols = (logoBadgeWidth / charWidth) + 1;
+        line1MaxCols = maxCols - reservedCols;
+        if (line1MaxCols < 3)
+        {
+            line1MaxCols = 3;
+        }
+    }
+
+    String line1 = truncateToColumns(airline, line1MaxCols);
     line2 = truncateToColumns(line2, maxCols);
     line3 = truncateToColumns(line3, maxCols);
 
@@ -170,6 +214,15 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
     drawTextLine(startX, y, line2, textColor);
     y += charHeight + lineSpacing;
     drawTextLine(startX, y, line3, textColor);
+
+    if (hasAirlineLogo)
+    {
+        const int badgeHeight = charHeight + 2;
+        const int badgeX = _matrixWidth - 1 - padding - logoBadgeWidth;
+        const int badgeY = 1 + padding;
+        _matrix->drawRect(badgeX, badgeY, logoBadgeWidth, badgeHeight, textColor);
+        drawTextLine(badgeX + 2, badgeY + 1, makeAirlineLogoBadgeText(f), textColor);
+    }
 }
 
 void NeoMatrixDisplay::displayFlights(const std::vector<FlightInfo> &flights)

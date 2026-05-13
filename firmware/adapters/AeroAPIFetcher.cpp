@@ -9,11 +9,34 @@ Output: Populates FlightInfo on success and returns true.
 */
 #include "adapters/AeroAPIFetcher.h"
 
-static String safeGetString(JsonVariant v, const char *key)
+static String safeGetString(JsonVariantConst objectVariant, const char *key)
 {
-    if (!v.containsKey(key) || v[key].isNull())
+    if (!objectVariant.is<JsonObjectConst>())
         return String("");
-    return String(v[key].as<const char *>());
+
+    JsonObjectConst object = objectVariant.as<JsonObjectConst>();
+    JsonVariantConst value = object[key];
+    if (value.isNull())
+        return String("");
+
+    const char *asCStr = value.as<const char *>();
+    if (asCStr == nullptr)
+        return String("");
+
+    return String(asCStr);
+}
+
+static String safeGetNestedString(JsonVariantConst objectVariant, const char *nestedObjectKey, const char *key)
+{
+    if (!objectVariant.is<JsonObjectConst>())
+        return String("");
+
+    JsonObjectConst object = objectVariant.as<JsonObjectConst>();
+    JsonVariantConst nestedVariant = object[nestedObjectKey];
+    if (!nestedVariant.is<JsonObjectConst>())
+        return String("");
+
+    return safeGetString(nestedVariant, key);
 }
 
 bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outInfo)
@@ -66,10 +89,38 @@ bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outI
     outInfo.ident = safeGetString(f, "ident");
     outInfo.ident_icao = safeGetString(f, "ident_icao");
     outInfo.ident_iata = safeGetString(f, "ident_iata");
-    outInfo.operator_code = safeGetString(f, "operator");
+    if (f["operator"].is<const char *>())
+    {
+        outInfo.operator_code = String(f["operator"].as<const char *>());
+    }
+    else
+    {
+        outInfo.operator_code = safeGetNestedString(f, "operator", "code");
+    }
     outInfo.operator_icao = safeGetString(f, "operator_icao");
     outInfo.operator_iata = safeGetString(f, "operator_iata");
     outInfo.aircraft_code = safeGetString(f, "aircraft_type");
+    outInfo.airline_logo_url = safeGetString(f, "operator_logo_url");
+    if (outInfo.airline_logo_url.length() == 0)
+    {
+        outInfo.airline_logo_url = safeGetString(f, "airline_logo_url");
+    }
+    if (outInfo.airline_logo_url.length() == 0)
+    {
+        outInfo.airline_logo_url = safeGetString(f, "logo_url");
+    }
+    if (outInfo.airline_logo_url.length() == 0)
+    {
+        outInfo.airline_logo_url = safeGetNestedString(f, "operator", "logo_url");
+    }
+    if (outInfo.airline_logo_url.length() == 0)
+    {
+        outInfo.airline_logo_url = safeGetNestedString(f, "operator", "logo");
+    }
+    if (outInfo.airline_logo_url.length() == 0)
+    {
+        outInfo.airline_logo_url = safeGetNestedString(f, "airline", "logo_url");
+    }
 
     if (f.containsKey("origin") && f["origin"].is<JsonObject>())
     {
