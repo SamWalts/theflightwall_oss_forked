@@ -9,12 +9,12 @@ Output: Populates FlightInfo on success and returns true.
 */
 #include "adapters/AeroAPIFetcher.h"
 
-static String safeGetString(JsonVariantConst objectVariant, const char *key)
+static String safeGetString(JsonVariantConst variant, const char *key)
 {
-    if (!objectVariant.is<JsonObjectConst>())
+    if (!variant.is<JsonObjectConst>())
         return String("");
 
-    JsonObjectConst object = objectVariant.as<JsonObjectConst>();
+    JsonObjectConst object = variant.as<JsonObjectConst>();
     JsonVariantConst value = object[key];
     if (value.isNull())
         return String("");
@@ -26,12 +26,12 @@ static String safeGetString(JsonVariantConst objectVariant, const char *key)
     return String(asCStr);
 }
 
-static String safeGetNestedString(JsonVariantConst objectVariant, const char *nestedObjectKey, const char *key)
+static String safeGetNestedString(JsonVariantConst variant, const char *nestedObjectKey, const char *key)
 {
-    if (!objectVariant.is<JsonObjectConst>())
+    if (!variant.is<JsonObjectConst>())
         return String("");
 
-    JsonObjectConst object = objectVariant.as<JsonObjectConst>();
+    JsonObjectConst object = variant.as<JsonObjectConst>();
     JsonVariantConst nestedVariant = object[nestedObjectKey];
     if (!nestedVariant.is<JsonObjectConst>())
         return String("");

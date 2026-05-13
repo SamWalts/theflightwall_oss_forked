@@ -187,7 +187,8 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
     int line1MaxCols = maxCols;
     if (hasAirlineLogo)
     {
-        const int reservedCols = (logoBadgeWidth / charWidth) + 1;
+        const int logoBadgeColumnPadding = 1;
+        const int reservedCols = (logoBadgeWidth / charWidth) + logoBadgeColumnPadding;
         line1MaxCols = maxCols - reservedCols;
         if (line1MaxCols < 3)
         {
