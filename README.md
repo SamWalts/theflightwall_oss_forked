@@ -100,6 +100,33 @@ The firmware can be built and uploaded to the ESP32 using [PlatformIO](https://p
    - Connect your ESP32 via USB
    - Click the "Upload" button (→) in the PlatformIO toolbar
 
+### macOS flight count logger
+
+If you want a simple macOS script that tracks how many flights are near a point and prints CSV rows, use [`opensky_flight_counter.py`](opensky_flight_counter.py).
+
+1. Add your OpenSky `client_id` and `client_secret` either:
+   - as `OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET` environment variables, or
+   - directly in the placeholders at the top of `opensky_flight_counter.py`
+2. Run it with your desired location and radius:
+
+   ```bash
+   python3 opensky_flight_counter.py \
+     --latitude 37.7749 \
+     --longitude -122.4194 \
+     --radius-km 10
+   ```
+
+3. The script prints CSV output to stdout, so you can save a 24+ hour run with shell redirection if needed:
+
+   ```bash
+   python3 opensky_flight_counter.py --latitude 37.7749 --longitude -122.4194 --radius-km 10 >> flights.csv
+   ```
+
+Useful options:
+- `--interval-seconds 60` to control polling frequency
+- `--run-once` to fetch one row and exit
+- `--timeout-seconds 30` to control HTTP timeouts
+
 ### Customization
 
 - **Brightness**: Controls overall display brightness (0–255)
