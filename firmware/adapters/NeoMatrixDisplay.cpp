@@ -131,7 +131,7 @@ String NeoMatrixDisplay::makeAirlineLogoBadgeText(const FlightInfo &f)
 
     if (badge.length() == 0)
     {
-        for (size_t i = 0; i < (size_t)f.airline_display_name_full.length() && badge.length() < 3; ++i)
+        for (size_t i = 0; i < f.airline_display_name_full.length() && badge.length() < 3; ++i)
         {
             char c = f.airline_display_name_full[i];
             if (isalpha((unsigned char)c))

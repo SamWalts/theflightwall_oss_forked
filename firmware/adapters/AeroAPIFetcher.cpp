@@ -39,6 +39,37 @@ static String safeGetNestedString(JsonVariantConst objectVariant, const char *ne
     return safeGetString(nestedVariant, key);
 }
 
+static String extractAirlineLogoUrl(JsonVariantConst flightVariant)
+{
+    const char *topLevelLogoKeys[] = {
+        "operator_logo_url",
+        "airline_logo_url",
+        "logo_url"};
+
+    for (const char *key : topLevelLogoKeys)
+    {
+        String value = safeGetString(flightVariant, key);
+        if (value.length() > 0)
+        {
+            return value;
+        }
+    }
+
+    String value = safeGetNestedString(flightVariant, "operator", "logo_url");
+    if (value.length() > 0)
+    {
+        return value;
+    }
+
+    value = safeGetNestedString(flightVariant, "operator", "logo");
+    if (value.length() > 0)
+    {
+        return value;
+    }
+
+    return safeGetNestedString(flightVariant, "airline", "logo_url");
+}
+
 bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outInfo)
 {
     if (strlen(APIConfiguration::AEROAPI_KEY) == 0)
@@ -100,27 +131,7 @@ bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outI
     outInfo.operator_icao = safeGetString(f, "operator_icao");
     outInfo.operator_iata = safeGetString(f, "operator_iata");
     outInfo.aircraft_code = safeGetString(f, "aircraft_type");
-    outInfo.airline_logo_url = safeGetString(f, "operator_logo_url");
-    if (outInfo.airline_logo_url.length() == 0)
-    {
-        outInfo.airline_logo_url = safeGetString(f, "airline_logo_url");
-    }
-    if (outInfo.airline_logo_url.length() == 0)
-    {
-        outInfo.airline_logo_url = safeGetString(f, "logo_url");
-    }
-    if (outInfo.airline_logo_url.length() == 0)
-    {
-        outInfo.airline_logo_url = safeGetNestedString(f, "operator", "logo_url");
-    }
-    if (outInfo.airline_logo_url.length() == 0)
-    {
-        outInfo.airline_logo_url = safeGetNestedString(f, "operator", "logo");
-    }
-    if (outInfo.airline_logo_url.length() == 0)
-    {
-        outInfo.airline_logo_url = safeGetNestedString(f, "airline", "logo_url");
-    }
+    outInfo.airline_logo_url = extractAirlineLogoUrl(f);
 
     if (f.containsKey("origin") && f["origin"].is<JsonObject>())
     {
