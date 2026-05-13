@@ -254,15 +254,21 @@ def emit_csv_rows(args: argparse.Namespace, client: OpenSkyClient) -> int:
             status = f"error:{type(error).__name__}"
             print(f"# {timestamp} request failed: {error}", file=sys.stderr, flush=True)
 
-        writer.writerow(
-            [timestamp, args.latitude, args.longitude, args.radius_km, "" if flight_count is None else flight_count, status]
-        )
+        row = [
+            timestamp,
+            args.latitude,
+            args.longitude,
+            args.radius_km,
+            "" if flight_count is None else flight_count,
+            status,
+        ]
+        writer.writerow(row)
         sys.stdout.flush()
 
         if args.run_once:
             return 0 if status == "ok" else 1
 
-        sleep_remaining = float(args.interval_seconds)
+        sleep_remaining = args.interval_seconds
         while sleep_remaining > 0 and not shutdown.stop_requested:
             step = min(1.0, sleep_remaining)
             time.sleep(step)
