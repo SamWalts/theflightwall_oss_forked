@@ -18,10 +18,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-# Optional fallback credentials. You can put your OpenSky API client values here.
-OPENSKY_CLIENT_ID = ""
-OPENSKY_CLIENT_SECRET = ""
-
 OPENSKY_TOKEN_URL = (
     "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/"
     "openid-connect/token"
@@ -192,16 +188,26 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fetch one sample row and exit.",
     )
+    parser.add_argument(
+        "--client-id",
+        default=None,
+        help="OpenSky client_id. Prefer OPENSKY_CLIENT_ID for long-running use.",
+    )
+    parser.add_argument(
+        "--client-secret",
+        default=None,
+        help="OpenSky client_secret. Prefer OPENSKY_CLIENT_SECRET for long-running use.",
+    )
     return parser.parse_args()
 
 
-def resolve_credentials() -> tuple[str, str]:
-    client_id = os.environ.get("OPENSKY_CLIENT_ID", OPENSKY_CLIENT_ID).strip()
-    client_secret = os.environ.get("OPENSKY_CLIENT_SECRET", OPENSKY_CLIENT_SECRET).strip()
+def resolve_credentials(args: argparse.Namespace) -> tuple[str, str]:
+    client_id = (args.client_id or os.environ.get("OPENSKY_CLIENT_ID", "")).strip()
+    client_secret = (args.client_secret or os.environ.get("OPENSKY_CLIENT_SECRET", "")).strip()
     if not client_id or not client_secret:
         raise SystemExit(
             "OpenSky credentials are required. Set OPENSKY_CLIENT_ID and "
-            "OPENSKY_CLIENT_SECRET or edit the placeholders in opensky_flight_counter.py."
+            "OPENSKY_CLIENT_SECRET, or pass --client-id and --client-secret."
         )
     return client_id, client_secret
 
@@ -238,18 +244,18 @@ def emit_csv_rows(args: argparse.Namespace, client: OpenSkyClient) -> int:
     while not shutdown.stop_requested:
         timestamp = datetime.now(timezone.utc).isoformat()
         status = "ok"
-        flight_count = ""
+        flight_count: int | None = None
         try:
             states = client.fetch_states(args.latitude, args.longitude, args.radius_km)
             flight_count = count_flights_within_radius(
                 states, args.latitude, args.longitude, args.radius_km
             )
-        except Exception as error:  # noqa: BLE001
+        except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError, RuntimeError) as error:
             status = f"error:{type(error).__name__}"
             print(f"# {timestamp} request failed: {error}", file=sys.stderr, flush=True)
 
         writer.writerow(
-            [timestamp, args.latitude, args.longitude, args.radius_km, flight_count, status]
+            [timestamp, args.latitude, args.longitude, args.radius_km, "" if flight_count is None else flight_count, status]
         )
         sys.stdout.flush()
 
@@ -268,7 +274,7 @@ def emit_csv_rows(args: argparse.Namespace, client: OpenSkyClient) -> int:
 def main() -> int:
     args = parse_args()
     validate_args(args)
-    client_id, client_secret = resolve_credentials()
+    client_id, client_secret = resolve_credentials(args)
     client = OpenSkyClient(
         client_id=client_id,
         client_secret=client_secret,

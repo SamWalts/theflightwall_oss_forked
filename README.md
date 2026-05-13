@@ -106,7 +106,7 @@ If you want a simple macOS script that tracks how many flights are near a point 
 
 1. Add your OpenSky `client_id` and `client_secret` either:
    - as `OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET` environment variables, or
-   - directly in the placeholders at the top of `opensky_flight_counter.py`
+   - on the command line with `--client-id` / `--client-secret`
 2. Run it with your desired location and radius:
 
    ```bash
