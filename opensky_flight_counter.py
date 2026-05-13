@@ -25,8 +25,10 @@ OPENSKY_TOKEN_URL = (
 OPENSKY_STATES_URL = "https://opensky-network.org/api/states/all"
 EARTH_RADIUS_KM = 6371.0088
 TOKEN_REFRESH_SKEW_SECONDS = 60
+DEFAULT_TOKEN_EXPIRY_SECONDS = 1800
 DEFAULT_INTERVAL_SECONDS = 60
 DEFAULT_TIMEOUT_SECONDS = 30
+MIN_BOUNDING_BOX_COS_LATITUDE = 0.01
 
 
 class GracefulShutdown:
@@ -92,7 +94,7 @@ class OpenSkyClient:
             },
         )
         access_token = payload.get("access_token")
-        expires_in = int(payload.get("expires_in", 1800))
+        expires_in = int(payload.get("expires_in", DEFAULT_TOKEN_EXPIRY_SECONDS))
         if not access_token:
             raise RuntimeError("OpenSky token response did not include access_token")
 
@@ -127,7 +129,8 @@ class OpenSkyClient:
 
 def build_bounding_box(latitude: float, longitude: float, radius_km: float) -> dict[str, str]:
     lat_delta_deg = math.degrees(radius_km / EARTH_RADIUS_KM)
-    safe_cos_lat = max(math.cos(math.radians(latitude)), 0.01)
+    # Clamp the cosine near the poles so longitude span math stays finite.
+    safe_cos_lat = max(math.cos(math.radians(latitude)), MIN_BOUNDING_BOX_COS_LATITUDE)
     lon_delta_deg = math.degrees(radius_km / (EARTH_RADIUS_KM * safe_cos_lat))
     return {
         "lamin": f"{latitude - lat_delta_deg:.6f}",
