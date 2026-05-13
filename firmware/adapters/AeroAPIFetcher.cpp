@@ -9,6 +9,11 @@ Output: Populates FlightInfo on success and returns true.
 */
 #include "adapters/AeroAPIFetcher.h"
 
+static constexpr const char *AEROAPI_TOP_LEVEL_LOGO_KEYS[] = {
+    "operator_logo_url",
+    "airline_logo_url",
+    "logo_url"};
+
 static String safeGetString(JsonVariantConst variant, const char *key)
 {
     if (!variant.is<JsonObjectConst>())
@@ -42,12 +47,7 @@ static String safeGetNestedString(JsonVariantConst variant, const char *nestedOb
 static String extractAirlineLogoUrl(JsonVariantConst flightVariant)
 {
     // AeroAPI responses may vary by endpoint/version; check known top-level logo keys first.
-    const char *topLevelLogoKeys[] = {
-        "operator_logo_url",
-        "airline_logo_url",
-        "logo_url"};
-
-    for (const char *key : topLevelLogoKeys)
+    for (const char *key : AEROAPI_TOP_LEVEL_LOGO_KEYS)
     {
         String value = safeGetString(flightVariant, key);
         if (value.length() > 0)

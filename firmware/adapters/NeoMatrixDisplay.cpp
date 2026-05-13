@@ -18,6 +18,8 @@ Outputs: Visual output to LED matrix using FastLED.
 #include "config/HardwareConfiguration.h"
 #include "config/TimingConfiguration.h"
 
+static const char *DEFAULT_AIRLINE_BADGE = "AIR";
+
 NeoMatrixDisplay::NeoMatrixDisplay() {}
 
 NeoMatrixDisplay::~NeoMatrixDisplay()
@@ -131,7 +133,8 @@ String NeoMatrixDisplay::makeAirlineLogoBadgeText(const FlightInfo &f)
 
     if (badge.length() == 0)
     {
-        for (size_t i = 0; i < f.airline_display_name_full.length() && badge.length() < 3; ++i)
+        const size_t airlineNameLength = f.airline_display_name_full.length();
+        for (size_t i = 0; i < airlineNameLength && badge.length() < 3; ++i)
         {
             char c = f.airline_display_name_full[i];
             if (isalpha((unsigned char)c))
@@ -143,7 +146,7 @@ String NeoMatrixDisplay::makeAirlineLogoBadgeText(const FlightInfo &f)
 
     if (badge.length() == 0)
     {
-        badge = String("AIR");
+        badge = String(DEFAULT_AIRLINE_BADGE);
     }
     if (badge.length() > 3)
     {
