@@ -167,7 +167,7 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
     const int innerWidth = _matrixWidth - 2 - (2 * padding); // Account for border and padding
     const int innerHeight = _matrixHeight - 2 - (2 * padding);
     const int maxCols = innerWidth / charWidth;
-    const bool hasAirlineLogo = f.airline_logo_url.length() > 0;
+    const bool hasAirlineLogoUrl = f.airline_logo_url.length() > 0;
     const int logoBadgeWidth = 22;
 
     // Lines per display:
@@ -185,7 +185,7 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
     String line3 = f.aircraft_display_name_short.length() ? f.aircraft_display_name_short : f.aircraft_code;
 
     int line1MaxCols = maxCols;
-    if (hasAirlineLogo)
+    if (hasAirlineLogoUrl)
     {
         const int logoBadgeColumnPadding = 1;
         const int reservedCols = (logoBadgeWidth / charWidth) + logoBadgeColumnPadding;
@@ -216,7 +216,7 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
     y += charHeight + lineSpacing;
     drawTextLine(startX, y, line3, textColor);
 
-    if (hasAirlineLogo)
+    if (hasAirlineLogoUrl)
     {
         const int badgeHeight = charHeight + 2;
         const int badgeX = _matrixWidth - 1 - padding - logoBadgeWidth;

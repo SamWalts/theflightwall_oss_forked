@@ -41,6 +41,7 @@ static String safeGetNestedString(JsonVariantConst variant, const char *nestedOb
 
 static String extractAirlineLogoUrl(JsonVariantConst flightVariant)
 {
+    // AeroAPI responses may vary by endpoint/version; check known top-level logo keys first.
     const char *topLevelLogoKeys[] = {
         "operator_logo_url",
         "airline_logo_url",
