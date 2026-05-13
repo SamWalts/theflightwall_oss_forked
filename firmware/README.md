@@ -4,7 +4,7 @@ This is a high-level overview of the firmware that powers TheFlightWall on ESP32
 
 ### What it does
 - **Fetch nearby aircraft** from OpenSky Network using OAuth (states/all) filtered by location, radius, and bearing.
-- **Enrich flights** with readable airline/aircraft info from AeroAPI and TheFlightWall CDN.
+- **Enrich flights** with readable airline/aircraft info and airline logo metadata from AeroAPI/TheFlightWall CDN.
 - **Render** a clean, minimal three-line flight card on a WS2812B LED matrix.
 
 ### Key components

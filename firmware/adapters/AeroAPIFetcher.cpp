@@ -9,11 +9,66 @@ Output: Populates FlightInfo on success and returns true.
 */
 #include "adapters/AeroAPIFetcher.h"
 
-static String safeGetString(JsonVariant v, const char *key)
+static constexpr const char *AEROAPI_TOP_LEVEL_LOGO_KEYS[] = {
+    "operator_logo_url",
+    "airline_logo_url",
+    "logo_url"};
+
+static String safeGetString(JsonVariantConst variant, const char *key)
 {
-    if (!v.containsKey(key) || v[key].isNull())
+    if (!variant.is<JsonObjectConst>())
         return String("");
-    return String(v[key].as<const char *>());
+
+    JsonObjectConst object = variant.as<JsonObjectConst>();
+    JsonVariantConst value = object[key];
+    if (value.isNull())
+        return String("");
+
+    const char *asCStr = value.as<const char *>();
+    if (asCStr == nullptr)
+        return String("");
+
+    return String(asCStr);
+}
+
+static String safeGetNestedString(JsonVariantConst variant, const char *nestedObjectKey, const char *key)
+{
+    if (!variant.is<JsonObjectConst>())
+        return String("");
+
+    JsonObjectConst object = variant.as<JsonObjectConst>();
+    JsonVariantConst nestedVariant = object[nestedObjectKey];
+    if (!nestedVariant.is<JsonObjectConst>())
+        return String("");
+
+    return safeGetString(nestedVariant, key);
+}
+
+static String extractAirlineLogoUrl(JsonVariantConst flightVariant)
+{
+    // AeroAPI responses may vary by endpoint/version; check known top-level logo keys first.
+    for (const char *key : AEROAPI_TOP_LEVEL_LOGO_KEYS)
+    {
+        String value = safeGetString(flightVariant, key);
+        if (value.length() > 0)
+        {
+            return value;
+        }
+    }
+
+    String value = safeGetNestedString(flightVariant, "operator", "logo_url");
+    if (value.length() > 0)
+    {
+        return value;
+    }
+
+    value = safeGetNestedString(flightVariant, "operator", "logo");
+    if (value.length() > 0)
+    {
+        return value;
+    }
+
+    return safeGetNestedString(flightVariant, "airline", "logo_url");
 }
 
 bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outInfo)
@@ -66,10 +121,18 @@ bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outI
     outInfo.ident = safeGetString(f, "ident");
     outInfo.ident_icao = safeGetString(f, "ident_icao");
     outInfo.ident_iata = safeGetString(f, "ident_iata");
-    outInfo.operator_code = safeGetString(f, "operator");
+    if (f["operator"].is<const char *>())
+    {
+        outInfo.operator_code = String(f["operator"].as<const char *>());
+    }
+    else
+    {
+        outInfo.operator_code = safeGetNestedString(f, "operator", "code");
+    }
     outInfo.operator_icao = safeGetString(f, "operator_icao");
     outInfo.operator_iata = safeGetString(f, "operator_iata");
     outInfo.aircraft_code = safeGetString(f, "aircraft_type");
+    outInfo.airline_logo_url = extractAirlineLogoUrl(f);
 
     if (f.containsKey("origin") && f["origin"].is<JsonObject>())
     {

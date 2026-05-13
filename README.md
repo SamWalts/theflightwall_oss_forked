@@ -7,7 +7,7 @@ This is the open source version with some basic guides to the panels, mounting t
 **Don't feel like building one? Check out the offical product: [theflightwall.com](https://theflightwall.com)**
 
 ![Main Image](images/main-image.png)
-*Airline logo lookup will be added soon!*
+*Airline logo metadata from AeroAPI is now integrated into the firmware display path.*
 
 # Component List
 - Main components
