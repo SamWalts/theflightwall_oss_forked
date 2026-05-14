@@ -30,6 +30,15 @@ namespace
         return out;
     }
 
+    static String maskedValue(const String &value)
+    {
+        if (value.length() == 0)
+        {
+            return "<empty>";
+        }
+        return String("<redacted:len=") + String(value.length()) + ">";
+    }
+
     static bool wifiReconnect()
     {
         const char *ssid = RuntimeConfiguration::wifiSsid();
@@ -154,13 +163,13 @@ namespace
             RuntimeConfiguration::getByKey("WIFI_SSID", value, error);
             sendLine(String("OK WIFI_SSID=") + value);
             RuntimeConfiguration::getByKey("WIFI_PASSWORD", value, error);
-            sendLine(String("OK WIFI_PASSWORD=") + value);
+            sendLine(String("OK WIFI_PASSWORD=") + maskedValue(value));
             RuntimeConfiguration::getByKey("OPENSKY_CLIENT_ID", value, error);
             sendLine(String("OK OPENSKY_CLIENT_ID=") + value);
             RuntimeConfiguration::getByKey("OPENSKY_CLIENT_SECRET", value, error);
-            sendLine(String("OK OPENSKY_CLIENT_SECRET=") + value);
+            sendLine(String("OK OPENSKY_CLIENT_SECRET=") + maskedValue(value));
             RuntimeConfiguration::getByKey("AEROAPI_KEY", value, error);
-            sendLine(String("OK AEROAPI_KEY=") + value);
+            sendLine(String("OK AEROAPI_KEY=") + maskedValue(value));
             sendLine("OK END");
             return;
         }
@@ -205,7 +214,7 @@ void BluetoothConfigService::begin()
         return;
     }
 
-    g_serialBt.setPin(BluetoothConfiguration::PAIRING_PIN, strlen(BluetoothConfiguration::PAIRING_PIN));
+    g_serialBt.setPin(BluetoothConfiguration::PAIRING_PIN, BluetoothConfiguration::PAIRING_PIN_LENGTH);
     g_started = true;
     Serial.println("Bluetooth config service started");
     sendLine("OK FLIGHTWALL_CONFIG_READY");

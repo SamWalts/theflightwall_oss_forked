@@ -74,7 +74,7 @@ The data for this project consists of two main data sources:
 The firmware now supports runtime configuration over Bluetooth (no reflashing required for key changes).
 
 - Bluetooth name: `FlightWall-Setup`
-- Pairing PIN: `482913`
+- Pairing PIN: `4913`
 - Config keys:
   - `NETWORK_ID` (alias for `WIFI_SSID`)
   - `WIFI_PASSWORD`
@@ -94,13 +94,13 @@ Command format:
 
 #### From a laptop
 
-1. Pair with Bluetooth device `FlightWall-Setup` using PIN `482913`.
+1. Pair with Bluetooth device `FlightWall-Setup` using PIN `4913`.
 2. Open a Bluetooth serial terminal (115200, newline).
    - macOS: Serial app like CoolTerm/Serial
    - Windows: Serial Bluetooth Terminal / Tera Term
    - Linux: pair with `bluetoothctl`, bind RFCOMM, then `screen /dev/rfcomm0 115200`
 3. Run:
-   - `AUTH 482913`
+   - `AUTH 4913`
    - `SET NETWORK_ID your_wifi_ssid`
    - `SET WIFI_PASSWORD your_wifi_password`
    - `SET OPENSKY_CLIENT_ID your_client_id`
@@ -115,9 +115,9 @@ Command format:
 #### From a phone or tablet
 
 1. Install a Bluetooth serial app (for example **Serial Bluetooth Terminal** on Android).
-2. Pair to `FlightWall-Setup` with PIN `482913`.
+2. Pair to `FlightWall-Setup` with PIN `4913`.
 3. Open the device connection and send the same commands as the laptop flow above (`AUTH`, then `SET ...`, then `RECONNECT_WIFI`).
-4. Use `GET <KEY>` or `LIST` to verify saved values.
+4. Use `GET <KEY>` to read a specific key, or `LIST` for a full summary (`LIST` redacts secrets).
 
 > Note: On iOS/iPadOS, standard Bluetooth serial (SPP) app support is limited. A laptop or Android device is recommended for initial provisioning.
 
