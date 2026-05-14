@@ -19,7 +19,8 @@ This is a high-level overview of the firmware that powers TheFlightWall on ESP32
 - **utils/GeoUtils.h**: Haversine distance and bounding boxes.
 
 ### Configuration quickstart
-- Set Wi‑Fi in `config/WiFiConfiguration.h`.
+- Preferred: set Wi‑Fi/API credentials over Bluetooth (`FlightWall-Setup`, PIN `482913`) using `AUTH`, `SET`, `GET`, and `RECONNECT_WIFI`.
+- Optional fallback defaults can be set in `config/WiFiConfiguration.h` and `config/APIConfiguration.h`.
 - Set location and display preferences in `config/UserConfiguration.h`.
 - Set intervals in `config/TimingConfiguration.h`.
 - Set display dimensions/pin in `config/HardwareConfiguration.h`.

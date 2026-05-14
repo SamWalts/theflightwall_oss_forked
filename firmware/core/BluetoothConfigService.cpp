@@ -1,0 +1,244 @@
+#include "core/BluetoothConfigService.h"
+
+#include <Arduino.h>
+#include <BluetoothSerial.h>
+#include <WiFi.h>
+#include <string.h>
+#include "config/BluetoothConfiguration.h"
+#include "core/RuntimeConfiguration.h"
+
+namespace
+{
+    static BluetoothSerial g_serialBt;
+    static bool g_started = false;
+    static bool g_authenticated = false;
+    static String g_inputLine;
+
+    static void sendLine(const String &line)
+    {
+        if (!g_started)
+            return;
+        g_serialBt.println(line);
+        Serial.println(String("[BT] ") + line);
+    }
+
+    static String toUpperTrimmed(const String &value)
+    {
+        String out = value;
+        out.trim();
+        out.toUpperCase();
+        return out;
+    }
+
+    static bool wifiReconnect()
+    {
+        const char *ssid = RuntimeConfiguration::wifiSsid();
+        const char *password = RuntimeConfiguration::wifiPassword();
+        if (strlen(ssid) == 0)
+        {
+            return false;
+        }
+
+        WiFi.mode(WIFI_STA);
+        WiFi.disconnect();
+        delay(200);
+        WiFi.begin(ssid, password);
+        for (int i = 0; i < 50 && WiFi.status() != WL_CONNECTED; ++i)
+        {
+            delay(200);
+        }
+
+        return WiFi.status() == WL_CONNECTED;
+    }
+
+    static void printHelp()
+    {
+        sendLine("OK COMMANDS:");
+        sendLine("AUTH <PIN>");
+        sendLine("GET <KEY>");
+        sendLine("SET <KEY> <VALUE>");
+        sendLine("LIST");
+        sendLine("RECONNECT_WIFI");
+        sendLine("STATUS");
+        sendLine("HELP");
+        sendLine("KEYS: NETWORK_ID|WIFI_SSID, WIFI_PASSWORD, OPENSKY_CLIENT_ID, OPENSKY_CLIENT_SECRET, AEROAPI_KEY");
+    }
+
+    static void handleCommand(const String &rawLine)
+    {
+        String line = rawLine;
+        line.trim();
+        if (line.length() == 0)
+        {
+            return;
+        }
+
+        int firstSpace = line.indexOf(' ');
+        String command = firstSpace < 0 ? line : line.substring(0, firstSpace);
+        String args = firstSpace < 0 ? String("") : line.substring(firstSpace + 1);
+
+        String commandUpper = toUpperTrimmed(command);
+
+        if (commandUpper == "HELP")
+        {
+            printHelp();
+            return;
+        }
+
+        if (commandUpper == "AUTH")
+        {
+            if (toUpperTrimmed(args) == String(BluetoothConfiguration::PAIRING_PIN))
+            {
+                g_authenticated = true;
+                sendLine("OK AUTHENTICATED");
+            }
+            else
+            {
+                sendLine("ERR BAD_PIN");
+            }
+            return;
+        }
+
+        if (!g_authenticated)
+        {
+            sendLine("ERR AUTH_REQUIRED");
+            return;
+        }
+
+        if (commandUpper == "GET")
+        {
+            String key = args;
+            key.trim();
+            if (key.length() == 0)
+            {
+                sendLine("ERR MISSING_KEY");
+                return;
+            }
+            String value;
+            String error;
+            if (!RuntimeConfiguration::getByKey(key, value, error))
+            {
+                sendLine(String("ERR ") + error);
+                return;
+            }
+            sendLine(String("OK ") + toUpperTrimmed(key) + "=" + value);
+            return;
+        }
+
+        if (commandUpper == "SET")
+        {
+            int secondSpace = args.indexOf(' ');
+            if (secondSpace < 0)
+            {
+                sendLine("ERR USE_SET_KEY_VALUE");
+                return;
+            }
+            String key = args.substring(0, secondSpace);
+            String value = args.substring(secondSpace + 1);
+            key.trim();
+
+            String error;
+            if (!RuntimeConfiguration::setByKey(key, value, error))
+            {
+                sendLine(String("ERR ") + error);
+                return;
+            }
+            sendLine(String("OK SAVED ") + toUpperTrimmed(key));
+            return;
+        }
+
+        if (commandUpper == "LIST")
+        {
+            String value;
+            String error;
+            RuntimeConfiguration::getByKey("WIFI_SSID", value, error);
+            sendLine(String("OK WIFI_SSID=") + value);
+            RuntimeConfiguration::getByKey("WIFI_PASSWORD", value, error);
+            sendLine(String("OK WIFI_PASSWORD=") + value);
+            RuntimeConfiguration::getByKey("OPENSKY_CLIENT_ID", value, error);
+            sendLine(String("OK OPENSKY_CLIENT_ID=") + value);
+            RuntimeConfiguration::getByKey("OPENSKY_CLIENT_SECRET", value, error);
+            sendLine(String("OK OPENSKY_CLIENT_SECRET=") + value);
+            RuntimeConfiguration::getByKey("AEROAPI_KEY", value, error);
+            sendLine(String("OK AEROAPI_KEY=") + value);
+            sendLine("OK END");
+            return;
+        }
+
+        if (commandUpper == "RECONNECT_WIFI")
+        {
+            if (wifiReconnect())
+            {
+                sendLine(String("OK WIFI_CONNECTED ") + WiFi.localIP().toString());
+            }
+            else
+            {
+                sendLine("ERR WIFI_CONNECT_FAILED");
+            }
+            return;
+        }
+
+        if (commandUpper == "STATUS")
+        {
+            sendLine(String("OK WIFI_STATUS=") + String((int)WiFi.status()));
+            if (WiFi.status() == WL_CONNECTED)
+            {
+                sendLine(String("OK WIFI_IP=") + WiFi.localIP().toString());
+            }
+            return;
+        }
+
+        sendLine("ERR UNKNOWN_COMMAND");
+    }
+}
+
+void BluetoothConfigService::begin()
+{
+    if (g_started || !BluetoothConfiguration::ENABLED)
+    {
+        return;
+    }
+
+    if (!g_serialBt.begin(BluetoothConfiguration::DEVICE_NAME))
+    {
+        Serial.println("Bluetooth config service failed to start");
+        return;
+    }
+
+    g_serialBt.setPin(BluetoothConfiguration::PAIRING_PIN, strlen(BluetoothConfiguration::PAIRING_PIN));
+    g_started = true;
+    Serial.println("Bluetooth config service started");
+    sendLine("OK FLIGHTWALL_CONFIG_READY");
+    sendLine("OK USE_AUTH_PIN");
+    printHelp();
+}
+
+void BluetoothConfigService::loop()
+{
+    if (!g_started)
+    {
+        return;
+    }
+
+    while (g_serialBt.available() > 0)
+    {
+        const char c = (char)g_serialBt.read();
+        if (c == '\r')
+        {
+            continue;
+        }
+        if (c == '\n')
+        {
+            handleCommand(g_inputLine);
+            g_inputLine = "";
+            continue;
+        }
+        if (g_inputLine.length() >= 255)
+        {
+            g_inputLine = "";
+            sendLine("ERR LINE_TOO_LONG");
+            continue;
+        }
+        g_inputLine += c;
+    }
+}

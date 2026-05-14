@@ -16,12 +16,15 @@ Configuration: UserConfiguration (location/filters/colors), TimingConfiguration 
 #include "adapters/OpenSkyFetcher.h"
 #include "adapters/AeroAPIFetcher.h"
 #include "core/FlightDataFetcher.h"
+#include "core/BluetoothConfigService.h"
+#include "core/RuntimeConfiguration.h"
 #include "adapters/NeoMatrixDisplay.h"
 
 static OpenSkyFetcher g_openSky;
 static AeroAPIFetcher g_aeroApi;
 static FlightDataFetcher *g_fetcher = nullptr;
 static NeoMatrixDisplay g_display;
+static BluetoothConfigService g_bluetoothConfig;
 
 static unsigned long g_lastFetchMs = 0;
 
@@ -29,15 +32,17 @@ void setup()
 {
     Serial.begin(115200);
     delay(200);
+    RuntimeConfiguration::begin();
+    g_bluetoothConfig.begin();
 
     g_display.initialize();
     g_display.displayMessage(String("FlightWall"));
 
-    if (strlen(WiFiConfiguration::WIFI_SSID) > 0)
+    if (strlen(RuntimeConfiguration::wifiSsid()) > 0)
     {
         WiFi.mode(WIFI_STA);
-        g_display.displayMessage(String("WiFi: ") + WiFiConfiguration::WIFI_SSID);
-        WiFi.begin(WiFiConfiguration::WIFI_SSID, WiFiConfiguration::WIFI_PASSWORD);
+        g_display.displayMessage(String("WiFi: ") + RuntimeConfiguration::wifiSsid());
+        WiFi.begin(RuntimeConfiguration::wifiSsid(), RuntimeConfiguration::wifiPassword());
         Serial.print("Connecting to WiFi");
         int attempts = 0;
         while (WiFi.status() != WL_CONNECTED && attempts < 50)
@@ -67,6 +72,8 @@ void setup()
 
 void loop()
 {
+    g_bluetoothConfig.loop();
+
     const unsigned long intervalMs = TimingConfiguration::FETCH_INTERVAL_SECONDS * 1000UL;
     const unsigned long now = millis();
     if (now - g_lastFetchMs >= intervalMs)

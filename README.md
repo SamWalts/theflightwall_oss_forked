@@ -58,20 +58,68 @@ The data for this project consists of two main data sources:
 ### Setting up OpenSky
 1. Register for an [OpenSky](https://opensky-network.org/) account
 2. Go to your [account page](https://opensky-network.org/my-opensky/account)
-3. Create a new API client and copy the `client_id` and `client_secret` to the [APIConfiguration.h](firmware/config/APIConfiguration.h) file
+3. Create a new API client and copy the `client_id` and `client_secret`
 
 
 ### Setting up AeroAPI
 1. Go to the [FlightAware AeroAPI]([https://flightaware.com/aeroapi](https://flightaware.com/aeroapi)) page and create a personal account
 3. From the dashboard, open **API Keys**, click **Create API Key** and follow the steps
-8. Copy the generated key and add it to [APIConfiguration.h](firmware/config/APIConfiguration.h)
+8. Copy the generated key
 
 
 ## Software Setup
 
-### Set your WiFi
+### Configure API keys and Wi-Fi over Bluetooth
 
-Enter your WiFi credentials into `WIFI_SSID` and `WIFI_PASSWORD` in [WiFiConfiguration.h](firmware/config/WiFiConfiguration.h)
+The firmware now supports runtime configuration over Bluetooth (no reflashing required for key changes).
+
+- Bluetooth name: `FlightWall-Setup`
+- Pairing PIN: `482913`
+- Config keys:
+  - `NETWORK_ID` (alias for `WIFI_SSID`)
+  - `WIFI_PASSWORD`
+  - `OPENSKY_CLIENT_ID`
+  - `OPENSKY_CLIENT_SECRET`
+  - `AEROAPI_KEY`
+
+Command format:
+
+- `AUTH <PIN>`
+- `GET <KEY>`
+- `SET <KEY> <VALUE>`
+- `LIST`
+- `RECONNECT_WIFI`
+- `STATUS`
+- `HELP`
+
+#### From a laptop
+
+1. Pair with Bluetooth device `FlightWall-Setup` using PIN `482913`.
+2. Open a Bluetooth serial terminal (115200, newline).
+   - macOS: Serial app like CoolTerm/Serial
+   - Windows: Serial Bluetooth Terminal / Tera Term
+   - Linux: pair with `bluetoothctl`, bind RFCOMM, then `screen /dev/rfcomm0 115200`
+3. Run:
+   - `AUTH 482913`
+   - `SET NETWORK_ID your_wifi_ssid`
+   - `SET WIFI_PASSWORD your_wifi_password`
+   - `SET OPENSKY_CLIENT_ID your_client_id`
+   - `SET OPENSKY_CLIENT_SECRET your_client_secret`
+   - `SET AEROAPI_KEY your_aeroapi_key`
+   - `RECONNECT_WIFI`
+4. Verify:
+   - `GET NETWORK_ID`
+   - `GET OPENSKY_CLIENT_ID`
+   - `STATUS`
+
+#### From a phone or tablet
+
+1. Install a Bluetooth serial app (for example **Serial Bluetooth Terminal** on Android).
+2. Pair to `FlightWall-Setup` with PIN `482913`.
+3. Open the device connection and send the same commands as the laptop flow above (`AUTH`, then `SET ...`, then `RECONNECT_WIFI`).
+4. Use `GET <KEY>` or `LIST` to verify saved values.
+
+> Note: On iOS/iPadOS, standard Bluetooth serial (SPP) app support is limited. A laptop or Android device is recommended for initial provisioning.
 
 ### Set your location
 
@@ -90,8 +138,9 @@ The firmware can be built and uploaded to the ESP32 using [PlatformIO](https://p
    - Add the [PlatformIO IDE extension](https://platformio.org/install/ide?install=vscode)
 
 2. **Configure your settings**:
-   - Add your API keys to [APIConfiguration.h](firmware/config/APIConfiguration.h)
-   - Add your WiFi credentials to [WiFiConfiguration.h](firmware/config/WiFiConfiguration.h)
+   - (Optional defaults) Add fallback API keys in [APIConfiguration.h](firmware/config/APIConfiguration.h)
+   - (Optional defaults) Add fallback WiFi in [WiFiConfiguration.h](firmware/config/WiFiConfiguration.h)
+   - Preferred: set/update API and WiFi credentials over Bluetooth using the commands above
    - Set your location (and optional display preferences) in [UserConfiguration.h](firmware/config/UserConfiguration.h)
    - Adjust display hardware (pin, tile layout) in [HardwareConfiguration.h](firmware/config/HardwareConfiguration.h)
 
