@@ -86,11 +86,14 @@ Command format:
 
 - `AUTH <PIN>`
 - `GET <KEY>`
+- `GET_RAW <KEY>`
 - `SET <KEY> <VALUE>`
 - `LIST`
 - `RECONNECT_WIFI`
 - `STATUS`
 - `HELP`
+
+Bluetooth pairing and `AUTH <PIN>` are both required before read/write commands are accepted.
 
 #### From a laptop
 
@@ -110,6 +113,7 @@ Command format:
 4. Verify:
    - `GET NETWORK_ID`
    - `GET OPENSKY_CLIENT_ID`
+   - `GET_RAW OPENSKY_CLIENT_SECRET`
    - `STATUS`
 
 #### From a phone or tablet
@@ -117,7 +121,7 @@ Command format:
 1. Install a Bluetooth serial app (for example **Serial Bluetooth Terminal** on Android).
 2. Pair to `FlightWall-Setup` with PIN `4913`.
 3. Open the device connection and send the same commands as the laptop flow above (`AUTH`, then `SET ...`, then `RECONNECT_WIFI`).
-4. Use `GET <KEY>` to read a specific key, or `LIST` for a full summary (`LIST` redacts secrets).
+4. Use `GET <KEY>` for safe reads (secrets are redacted), `GET_RAW <KEY>` when you need the actual secret value, or `LIST` for a full summary.
 
 > Note: On iOS/iPadOS, standard Bluetooth serial (SPP) app support is limited. A laptop or Android device is recommended for initial provisioning.
 

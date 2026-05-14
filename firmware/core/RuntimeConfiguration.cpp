@@ -32,11 +32,21 @@ namespace RuntimeConfiguration
             copyValue(dest, destSize, value);
         }
 
+        static void loadDefaults()
+        {
+            copyValue(g_wifiSsid, sizeof(g_wifiSsid), WiFiConfiguration::DEFAULT_WIFI_SSID);
+            copyValue(g_wifiPassword, sizeof(g_wifiPassword), WiFiConfiguration::DEFAULT_WIFI_PASSWORD);
+            copyValue(g_openSkyClientId, sizeof(g_openSkyClientId), APIConfiguration::DEFAULT_OPENSKY_CLIENT_ID);
+            copyValue(g_openSkyClientSecret, sizeof(g_openSkyClientSecret), APIConfiguration::DEFAULT_OPENSKY_CLIENT_SECRET);
+            copyValue(g_aeroApiKey, sizeof(g_aeroApiKey), APIConfiguration::DEFAULT_AEROAPI_KEY);
+        }
+
         static bool putValue(const char *key, const String &value, char *dest, size_t destSize)
         {
             const size_t stored = g_preferences.putString(key, value);
-            if (stored != value.length())
+            if (stored == 0)
             {
+                Serial.printf("RuntimeConfiguration: Failed to persist key '%s' to NVS\n", key);
                 return false;
             }
             copyValue(dest, destSize, value);
@@ -61,11 +71,7 @@ namespace RuntimeConfiguration
 
         if (!g_preferences.begin("flightcfg", false))
         {
-            copyValue(g_wifiSsid, sizeof(g_wifiSsid), WiFiConfiguration::DEFAULT_WIFI_SSID);
-            copyValue(g_wifiPassword, sizeof(g_wifiPassword), WiFiConfiguration::DEFAULT_WIFI_PASSWORD);
-            copyValue(g_openSkyClientId, sizeof(g_openSkyClientId), APIConfiguration::DEFAULT_OPENSKY_CLIENT_ID);
-            copyValue(g_openSkyClientSecret, sizeof(g_openSkyClientSecret), APIConfiguration::DEFAULT_OPENSKY_CLIENT_SECRET);
-            copyValue(g_aeroApiKey, sizeof(g_aeroApiKey), APIConfiguration::DEFAULT_AEROAPI_KEY);
+            loadDefaults();
             g_ready = true;
             return;
         }
