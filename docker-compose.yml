@@ -1,0 +1,36 @@
+services:
+  pi-enrichment:
+    build:
+      context: .
+      dockerfile: pi_enrichment/Dockerfile
+    container_name: flightwall-pi-enrichment
+    environment:
+      RUN_FAA_SYNC_ON_START: "true"
+      FAA_DB_PATH: /data/faa_registry.sqlite3
+      FAA_CSV_PATH: /data/faa_registry.csv
+      FAA_META_PATH: /data/faa_registry_meta.json
+      FLIGHTWALL_PI_HOST: 0.0.0.0
+      FLIGHTWALL_PI_PORT: 8080
+    volumes:
+      - flightwall_data:/data
+    ports:
+      - "8080:8080"
+
+  flightwall-sim:
+    build:
+      context: .
+      dockerfile: flightwall_sim/Dockerfile
+    container_name: flightwall-simulator
+    environment:
+      PI_ENRICHMENT_BASE_URL: http://pi-enrichment:8080
+      FLIGHTWALL_SIM_HOST: 0.0.0.0
+      FLIGHTWALL_SIM_PORT: 8090
+      SIM_INPUT_PATH: /app/sample_aircraft.json
+      SIM_POLL_SECONDS: 5
+    depends_on:
+      - pi-enrichment
+    ports:
+      - "8090:8090"
+
+volumes:
+  flightwall_data:

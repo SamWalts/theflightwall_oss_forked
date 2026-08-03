@@ -58,6 +58,7 @@ The data for this project consists of two main data sources:
 Optional local enrichment:
 - Run the Raspberry Pi FAA enrichment API to map ADS-B ICAO (`hex`) to operator and model data.
 - See [pi_enrichment/README.md](pi_enrichment/README.md) for API contract, FAA sync pipeline, and systemd setup.
+- For one-machine Docker testing of both Pi enrichment and a FlightWall simulator, see [docker/README.md](docker/README.md).
 
 ### Setting up OpenSky
 1. Register for an [OpenSky](https://opensky-network.org/) account
