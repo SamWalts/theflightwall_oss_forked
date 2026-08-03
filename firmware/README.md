@@ -12,7 +12,7 @@ This is a high-level overview of the firmware that powers TheFlightWall on ESP32
 - **core/FlightDataFetcher**: Orchestrates: fetch state vectors → fetch flight metadata → enrich names.
 - **adapters/OpenSkyFetcher**: Queries OpenSky states/all with OAuth; parses and filters by geo.
 - **adapters/AeroAPIFetcher**: Retrieves flight details by ident via AeroAPI.
-- **adapters/FlightWallFetcher**: Looks up human‑friendly airline/aircraft names from CDN.
+- **adapters/FlightWallFetcher**: Looks up airline/aircraft names from CDN and optional local Pi enrichment service.
 - **adapters/NeoMatrixDisplay**: Draws bordered, centered three‑line flight card; cycles flights; shows loading.
 - **config/**: User/API/timing/hardware/Wi‑Fi settings.
 - **models/**: Lightweight structs for `StateVector`, `FlightInfo`, `AirportInfo`.
@@ -23,7 +23,11 @@ This is a high-level overview of the firmware that powers TheFlightWall on ESP32
 - Set location and display preferences in `config/UserConfiguration.h`.
 - Set intervals in `config/TimingConfiguration.h`.
 - Set display dimensions/pin in `config/HardwareConfiguration.h`.
-- Provide API credentials/URLs in `config/APIConfiguration.h` (OpenSky OAuth, AeroAPI key, CDN base).
+- Provide API credentials/URLs in `config/APIConfiguration.h` (OpenSky OAuth, AeroAPI key, CDN base, optional `PI_ENRICHMENT_BASE_URL`).
+
+### Optional local Pi enrichment
+- Set `PI_ENRICHMENT_BASE_URL` in `config/APIConfiguration.h` to your Pi service (for example `http://192.168.1.50:8080`).
+- Firmware will query `GET /v1/aircraft/{adsb_icao}` first and fall back to CDN enrichment when local data is unavailable.
 
 ### Build
 - PlatformIO project: see `platformio.ini`.

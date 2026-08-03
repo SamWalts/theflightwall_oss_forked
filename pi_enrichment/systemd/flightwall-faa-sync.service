@@ -1,0 +1,13 @@
+[Unit]
+Description=FlightWall FAA Registry Sync
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=pi
+WorkingDirectory=/opt/theflightwall/pi_enrichment
+Environment=FAA_DB_PATH=/var/lib/flightwall/faa_registry.sqlite3
+Environment=FAA_CSV_PATH=/var/lib/flightwall/faa_registry.csv
+Environment=FAA_META_PATH=/var/lib/flightwall/faa_registry_meta.json
+ExecStart=/usr/bin/python3 /opt/theflightwall/pi_enrichment/faa_pipeline.py
