@@ -18,6 +18,16 @@ public:
                          String &outDisplayNameShort,
                          String &outDisplayNameFull);
 
+    bool getAircraftEnrichmentByAdsbIcao(const String &adsbIcao,
+                                         String &outRegistration,
+                                         String &outOperatorName,
+                                         String &outOperatorIcao,
+                                         String &outAircraftModel,
+                                         String &outAircraftType,
+                                         String &outSource,
+                                         String &outUpdatedAt,
+                                         bool &outFound);
+
 private:
     bool httpGetJson(const String &url, String &outPayload);
 };

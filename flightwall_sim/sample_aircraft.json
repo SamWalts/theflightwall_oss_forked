@@ -1,0 +1,14 @@
+[
+  {
+    "hex": "A1B2C3",
+    "flight": "UAL123"
+  },
+  {
+    "hex": "A4B5C6",
+    "flight": "DAL456"
+  },
+  {
+    "hex": "A7B8C9",
+    "flight": "SWA789"
+  }
+]

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run FlightWall FAA Registry Sync every 6 hours
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=6h
+Unit=flightwall-faa-sync.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

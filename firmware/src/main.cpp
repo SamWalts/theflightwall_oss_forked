@@ -105,12 +105,18 @@ void loop()
             Serial.println(f.airline_display_name_full);
             Serial.print("Aircraft: ");
             Serial.println(f.aircraft_display_name_short.length() ? f.aircraft_display_name_short : f.aircraft_code);
+            Serial.print("Registration: ");
+            Serial.println(f.registration);
             Serial.print("Operator Code: ");
             Serial.println(f.operator_code);
             Serial.print("Operator ICAO: ");
             Serial.println(f.operator_icao);
             Serial.print("Operator IATA: ");
             Serial.println(f.operator_iata);
+            Serial.print("Enrichment Source: ");
+            Serial.println(f.enrichment_source);
+            Serial.print("Enrichment Updated At: ");
+            Serial.println(f.enrichment_updated_at);
 
             Serial.println("--- Origin ---");
             Serial.print("Code ICAO: ");

@@ -10,14 +10,26 @@ Outputs: Display name strings (short/full) via out parameters.
 
 bool FlightWallFetcher::httpGetJson(const String &url, String &outPayload)
 {
-    WiFiClientSecure client;
-    if (APIConfiguration::FLIGHTWALL_INSECURE_TLS)
-    {
-        client.setInsecure();
-    }
-
     HTTPClient http;
-    http.begin(client, url);
+    if (url.startsWith("https://"))
+    {
+        WiFiClientSecure client;
+        if (APIConfiguration::FLIGHTWALL_INSECURE_TLS)
+        {
+            client.setInsecure();
+        }
+        if (!http.begin(client, url))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if (!http.begin(url))
+        {
+            return false;
+        }
+    }
     http.addHeader("Accept", "application/json");
 
     int code = http.GET();
@@ -83,4 +95,66 @@ bool FlightWallFetcher::getAircraftName(const String &aircraftIcao,
         outDisplayNameFull = String(doc["display_name_full"].as<const char *>());
     }
     return outDisplayNameShort.length() > 0 || outDisplayNameFull.length() > 0;
+}
+
+static String safeGetString(JsonVariant v, const char *key)
+{
+    if (!v.containsKey(key) || v[key].isNull())
+    {
+        return String("");
+    }
+    return String(v[key].as<const char *>());
+}
+
+bool FlightWallFetcher::getAircraftEnrichmentByAdsbIcao(const String &adsbIcao,
+                                                         String &outRegistration,
+                                                         String &outOperatorName,
+                                                         String &outOperatorIcao,
+                                                         String &outAircraftModel,
+                                                         String &outAircraftType,
+                                                         String &outSource,
+                                                         String &outUpdatedAt,
+                                                         bool &outFound)
+{
+    outRegistration = String("");
+    outOperatorName = String("");
+    outOperatorIcao = String("");
+    outAircraftModel = String("");
+    outAircraftType = String("");
+    outSource = String("");
+    outUpdatedAt = String("");
+    outFound = false;
+
+    if (adsbIcao.length() == 0 || strlen(APIConfiguration::PI_ENRICHMENT_BASE_URL) == 0)
+    {
+        return false;
+    }
+
+    String normalized = adsbIcao;
+    normalized.toUpperCase();
+
+    String url = String(APIConfiguration::PI_ENRICHMENT_BASE_URL) + "/v1/aircraft/" + normalized;
+    String payload;
+    if (!httpGetJson(url, payload))
+    {
+        return false;
+    }
+
+    DynamicJsonDocument doc(1024);
+    DeserializationError err = deserializeJson(doc, payload);
+    if (err)
+    {
+        return false;
+    }
+
+    outFound = doc["found"] | false;
+    outRegistration = safeGetString(doc, "registration");
+    outOperatorName = safeGetString(doc, "operator_name");
+    outOperatorIcao = safeGetString(doc, "operator_icao");
+    outAircraftModel = safeGetString(doc, "aircraft_model");
+    outAircraftType = safeGetString(doc, "aircraft_type");
+    outSource = safeGetString(doc, "source");
+    outUpdatedAt = safeGetString(doc, "updated_at");
+
+    return true;
 }
