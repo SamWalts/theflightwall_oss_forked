@@ -82,7 +82,7 @@ class OpenSkyClient:
                         "Authorization": f"Bearer {token}",
                     },
                 )
-                # print(f"Debug: API response payload: {payload}", flush=True)
+                print(f"Debug: API response payload: {payload}", flush=True)
                 return payload.get("states") or []
             except urllib.error.HTTPError as error:
                 if error.code == 401 and attempt == 0:
@@ -140,7 +140,7 @@ def build_bounding_box(latitude: float, longitude: float, radius_km: float) -> d
         "lomin": f"{longitude - lon_delta_deg:.6f}",
         "lomax": f"{longitude + lon_delta_deg:.6f}",
     }
-    # print(f"Debug: Bounding box: {bounding_box}", flush=True)
+    print(f"Debug: Bounding box: {bounding_box}", flush=True)
     return bounding_box
 
 def haversine_km(latitude_a: float, longitude_a: float, latitude_b: float, longitude_b: float) -> float:
@@ -161,17 +161,15 @@ def count_flights_within_radius(
     for state in states:
         if len(state) < 7:
             continue
-        state_callsign = state[1]  # Extract the second item (callsign or identifier)
         state_longitude = state[5]
         state_latitude = state[6]
         if state_latitude is None or state_longitude is None:
             continue
         distance = haversine_km(latitude, longitude, float(state_latitude), float(state_longitude))
+        print(f"Debug: Flight at ({state_latitude}, {state_longitude}) is {distance:.2f} km away.", flush=True)
         if distance <= radius_km:
             flight_count += 1
-            print(f"Flight {state_callsign} is within {radius_km} km at distance {distance:.2f} km.")
     return flight_count
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -235,59 +233,61 @@ def validate_args(args: argparse.Namespace) -> None:
 
 
 def emit_csv_rows(args: argparse.Namespace, client: OpenSkyClient) -> int:
-    header = "timestamp_utc,center_latitude,center_longitude,radius_km,flight_count,poll_status,callsigns\n"
+    file_path = "flights_output.csv"  # Specify the output file name
+    write_header = not os.path.exists(file_path)  # Check if the file exists
 
-    while True:
-        try:
-            # Build the bounding box and fetch states
-            bounding_box = build_bounding_box(args.latitude, args.longitude, args.radius_km)
-            params = urllib.parse.urlencode(bounding_box)
-            url = f"{OPENSKY_STATES_URL}?{params}"
-            token = client._ensure_token()
-            states = client.fetch_states(args.latitude, args.longitude, args.radius_km)
+    with open(file_path, "a", newline="") as csv_file:  # Open the file in append mode
+        writer = csv.writer(csv_file, lineterminator="\n")
 
-            # Process states and count flights
-            flight_count = 0
-            callsigns = []
-            for state in states:
-                if len(state) < 7:
-                    continue
-                state_callsign = state[1]  # Extract the callsign
-                state_longitude = state[5]
-                state_latitude = state[6]
-                if state_latitude is None or state_longitude is None:
-                    continue
-                distance = haversine_km(args.latitude, args.longitude, float(state_latitude), float(state_longitude))
-                if distance <= args.radius_km:
-                    flight_count += 1
-                    callsigns.append(state_callsign)
+        # Write the header if the file is new
+        if write_header:
+            writer.writerow(
+                [
+                    "timestamp_utc",
+                    "center_latitude",
+                    "center_longitude",
+                    "radius_km",
+                    "flight_count",
+                    "poll_status",
+                ]
+            )
 
-            # Write the row to the CSV file
+        shutdown = GracefulShutdown()
+
+        while not shutdown.stop_requested:
             timestamp = datetime.now(timezone.utc).isoformat()
-            callsigns_str = ";".join(callsigns)  # Join callsigns into a single string
-            row = f"{timestamp},{args.latitude},{args.longitude},{args.radius_km},{flight_count},ok,\"{callsigns_str}\"\n"
+            status = "ok"
+            flight_count: int | None = None
+            try:
+                states = client.fetch_states(args.latitude, args.longitude, args.radius_km)
+                flight_count = count_flights_within_radius(
+                    states, args.latitude, args.longitude, args.radius_km
+                )
+            except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError, RuntimeError) as error:
+                status = f"error:{type(error).__name__}"
+                print(f"# {timestamp} request failed: {error}", file=sys.stderr, flush=True)
 
-            # Check if the file is empty and write the header if needed
-            write_header = not os.path.exists(file_path) or os.stat(file_path).st_size == 0
-            with open(file_path, "a") as csv_file:
-                if write_header:
-                    csv_file.write(header)
-                csv_file.write(row)
+            row = [
+                timestamp,
+                args.latitude,
+                args.longitude,
+                args.radius_km,
+                "" if flight_count is None else flight_count,
+                status,
+            ]
+            writer.writerow(row)  # Write the row to the file
+            csv_file.flush()  # Ensure the data is written to the file immediately
 
             if args.run_once:
-                break
+                return 0 if status == "ok" else 1
 
-            time.sleep(args.interval_seconds)
-        except Exception as e:
-            timestamp = datetime.now(timezone.utc).isoformat()
-            row = f"{timestamp},{args.latitude},{args.longitude},{args.radius_km},0,error\n"
-            with open(file_path, "a") as csv_file:
-                csv_file.write(row)
-            if args.run_once:
-                break
+            sleep_remaining = args.interval_seconds
+            while sleep_remaining > 0 and not shutdown.stop_requested:
+                step = min(1.0, sleep_remaining)
+                time.sleep(step)
+                sleep_remaining -= step
+
     return 0
-
-
 def main() -> int:
     args = parse_args()
     validate_args(args)

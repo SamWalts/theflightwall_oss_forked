@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "author": "Uri Shaked",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -19.2, "left": -4.76, "attrs": {} },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix1",
+      "top": -180.4,
+      "left": 623.8,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix2",
+      "top": -180.4,
+      "left": 249.4,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix3",
+      "top": -180.4,
+      "left": 1372.6,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix4",
+      "top": -180.4,
+      "left": 998.2,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix5",
+      "top": -180.4,
+      "left": 2121.4,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix6",
+      "top": -180.4,
+      "left": 1747,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix7",
+      "top": -180.4,
+      "left": 2870.2,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix8",
+      "top": -180.4,
+      "left": 2495.8,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix10",
+      "top": -180.4,
+      "left": 3244.6,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix12",
+      "top": -180.4,
+      "left": 3619,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix11",
+      "top": 194,
+      "left": 623.8,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix13",
+      "top": 194,
+      "left": 249.4,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix14",
+      "top": 194,
+      "left": 1372.6,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix15",
+      "top": 194,
+      "left": 2121.4,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix16",
+      "top": 194,
+      "left": 1747,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix17",
+      "top": 194,
+      "left": 2870.2,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix18",
+      "top": 194,
+      "left": 2495.8,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix19",
+      "top": 194,
+      "left": 3244.6,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix20",
+      "top": 194,
+      "left": 3619,
+      "attrs": { "rows": "16", "cols": "16" }
+    },
+    {
+      "type": "wokwi-led-matrix",
+      "id": "matrix21",
+      "top": 194,
+      "left": 998.2,
+      "attrs": { "rows": "16", "cols": "16" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "matrix17:DOUT", "matrix19:DIN", "green", [ "v0" ] ],
+    [ "matrix13:DOUT", "matrix2:DIN", "green", [ "v0" ] ],
+    [ "matrix2:DOUT", "matrix1:DIN", "green", [ "v0" ] ],
+    [ "matrix1:DOUT", "matrix11:DIN", "green", [ "v0" ] ],
+    [ "matrix11:DOUT", "matrix21:DIN", "green", [ "v0" ] ],
+    [ "matrix21:DOUT", "matrix4:DIN", "green", [ "v0" ] ],
+    [ "matrix4:DOUT", "matrix3:DIN", "green", [ "v0" ] ],
+    [ "matrix3:DOUT", "matrix14:DIN", "green", [ "v0" ] ],
+    [ "matrix14:DOUT", "matrix6:DIN", "green", [ "v0" ] ],
+    [ "matrix6:DOUT", "matrix16:DIN", "green", [ "v0" ] ],
+    [ "matrix16:DOUT", "matrix15:DIN", "green", [ "v0" ] ],
+    [ "matrix15:DOUT", "matrix5:DIN", "green", [ "v0" ] ],
+    [ "matrix5:DOUT", "matrix8:DIN", "green", [ "v0" ] ],
+    [ "matrix8:DOUT", "matrix18:DIN", "green", [ "v0" ] ],
+    [ "matrix18:DOUT", "matrix7:DIN", "green", [ "v0" ] ],
+    [ "matrix7:DOUT", "matrix17:DIN", "green", [ "v0" ] ],
+    [ "matrix19:DOUT", "matrix10:DIN", "green", [ "v0" ] ],
+    [ "matrix10:DOUT", "matrix12:DIN", "green", [ "v0" ] ],
+    [ "matrix12:DOUT", "matrix20:DIN", "green", [ "v0" ] ],
+    [ "esp:GND.2", "matrix13:VSS", "black", [ "v0" ] ],
+    [ "matrix13:VSS", "matrix2:VSS", "green", [ "v0" ] ],
+    [ "matrix2:VSS", "matrix1:VSS", "green", [ "v0" ] ],
+    [ "matrix1:VSS", "matrix11:VSS", "green", [ "v0" ] ],
+    [ "matrix13:VDD", "matrix2:VDD", "green", [ "v0" ] ],
+    [ "matrix2:VDD", "matrix1:VDD", "green", [ "v0" ] ],
+    [ "matrix1:VDD", "matrix11:VDD", "green", [ "v0" ] ],
+    [ "matrix11:VDD", "matrix21:VDD", "green", [ "v0" ] ],
+    [ "matrix21:VDD", "matrix4:VDD", "green", [ "v0" ] ],
+    [ "matrix21:VSS", "matrix11:VSS", "green", [ "v0" ] ],
+    [ "matrix4:VSS", "matrix3:VSS", "green", [ "v0" ] ],
+    [ "matrix3:VDD", "matrix14:VDD", "green", [ "v0" ] ],
+    [ "matrix14:VSS", "matrix3:VSS", "green", [ "v0" ] ],
+    [ "matrix16:VDD", "matrix14:VDD", "green", [ "v0" ] ],
+    [ "matrix14:VSS", "matrix16:VSS", "green", [ "v0" ] ],
+    [ "matrix16:VSS", "matrix6:VSS", "green", [ "v0" ] ],
+    [ "matrix6:VDD", "matrix16:VDD", "green", [ "v0" ] ],
+    [ "matrix6:VSS", "matrix5:VSS", "green", [ "v0" ] ],
+    [ "matrix6:VDD", "matrix5:VDD", "green", [ "v0" ] ],
+    [ "matrix5:VDD", "matrix15:VDD", "green", [ "v0" ] ],
+    [ "matrix15:VDD", "matrix18:VDD", "green", [ "v0" ] ],
+    [ "matrix15:VSS", "matrix18:VSS", "green", [ "v0" ] ],
+    [ "matrix18:VDD", "matrix8:VDD", "green", [ "v0" ] ],
+    [ "matrix8:VSS", "matrix18:VSS", "green", [ "v0" ] ],
+    [ "matrix8:VDD", "matrix7:VDD", "green", [ "v28.8", "h374.4" ] ],
+    [ "matrix8:VSS", "matrix7:VSS", "green", [ "v-38.4", "h374.4" ] ],
+    [ "matrix7:VDD", "matrix17:VDD", "green", [ "v0" ] ],
+    [ "matrix17:VSS", "matrix7:VSS", "green", [ "v0" ] ],
+    [ "matrix17:VDD", "matrix19:VDD", "green", [ "v0" ] ],
+    [ "matrix19:VSS", "matrix17:VSS", "green", [ "v0" ] ],
+    [ "matrix19:VDD", "matrix10:VDD", "green", [ "v0" ] ],
+    [ "matrix10:VSS", "matrix19:VSS", "green", [ "v0" ] ],
+    [ "matrix10:VSS", "matrix12:VSS", "green", [ "v0" ] ],
+    [ "matrix10:VDD", "matrix12:VDD", "green", [ "v0" ] ],
+    [ "matrix12:VDD", "matrix20:VDD", "green", [ "v0" ] ],
+    [ "matrix12:VSS", "matrix20:VSS", "green", [ "v0" ] ],
+    [ "esp:13", "matrix13:DIN", "green", [ "v451.2", "h422.55" ] ],
+    [ "esp:5V", "matrix13:VDD", "red", [ "h28.95", "v441.6", "h403.6" ] ],
+    [ "esp:5V", "matrix5:VDD", "red", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
