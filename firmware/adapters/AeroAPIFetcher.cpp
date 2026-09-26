@@ -71,8 +71,44 @@ static String extractAirlineLogoUrl(JsonVariantConst flightVariant)
     return safeGetNestedString(flightVariant, "airline", "logo_url");
 }
 
+String AeroAPIFetcher::makeRpiLogoUrl(const FlightInfo &flightInfo) const
+{
+    String airlineCode = flightInfo.operator_icao.length() ? flightInfo.operator_icao : flightInfo.operator_code;
+    if (airlineCode.length() == 0)
+    {
+        return String("");
+    }
+
+    airlineCode.toUpperCase();
+    return String(APIConfiguration::RPI_LOGO_BASE_URL) + APIConfiguration::RPI_LOGO_PATH + "/" + airlineCode;
+}
+
+bool AeroAPIFetcher::fetchFlightInfoFromRpiStub(const String &flightIdent, FlightInfo &outInfo)
+{
+    (void)flightIdent;
+    (void)outInfo;
+    Serial.println("AeroAPIFetcher: RPI flight endpoint stub selected but not implemented yet");
+    Serial.print("Expected endpoint shape: ");
+    Serial.print(APIConfiguration::RPI_BASE_URL);
+    Serial.println(APIConfiguration::RPI_FLIGHT_INFO_PATH);
+    return false;
+}
+
 bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outInfo)
 {
+    if (APIConfiguration::USE_RPI_API_STUBS)
+    {
+        if (fetchFlightInfoFromRpiStub(flightIdent, outInfo))
+        {
+            if (outInfo.airline_logo_url.length() == 0)
+            {
+                outInfo.airline_logo_url = makeRpiLogoUrl(outInfo);
+            }
+            return true;
+        }
+        return false;
+    }
+
     if (strlen(APIConfiguration::AEROAPI_KEY) == 0)
     {
         Serial.println("AeroAPIFetcher: No API key configured");
@@ -144,6 +180,11 @@ bool AeroAPIFetcher::fetchFlightInfo(const String &flightIdent, FlightInfo &outI
     {
         JsonObject d = f["destination"].as<JsonObject>();
         outInfo.destination.code_icao = safeGetString(d, "code_icao");
+    }
+
+    if (outInfo.airline_logo_url.length() == 0)
+    {
+        outInfo.airline_logo_url = makeRpiLogoUrl(outInfo);
     }
 
     return true;

@@ -19,6 +19,16 @@ namespace APIConfiguration
     // FlightWall CDN lookup
     static constexpr const char *FLIGHTWALL_CDN_BASE_URL = "https://cdn.theflightwall.com";
 
+    // Raspberry Pi local API stubs (future migration target)
+    // Enable this to route fetchers through local endpoints once implemented.
+    static const bool USE_RPI_API_STUBS = false;
+    static constexpr const char *RPI_BASE_URL = "http://raspberrypi.local:8080";
+    static constexpr const char *RPI_FLIGHT_INFO_PATH = "/api/flights";
+    static constexpr const char *RPI_LOOKUP_PATH = "/api/lookup";
+    // Separate logo endpoint (intentionally split from general flight endpoint)
+    static constexpr const char *RPI_LOGO_BASE_URL = "http://raspberrypi.local:8081";
+    static constexpr const char *RPI_LOGO_PATH = "/api/logos/airline";
+
     // TLS behavior for external services
     static const bool AEROAPI_INSECURE_TLS = true;
     static const bool FLIGHTWALL_INSECURE_TLS = true;

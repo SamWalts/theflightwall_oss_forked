@@ -53,3 +53,7 @@ VS Code flow:
 ### Notes
 - OpenSky OAuth is required for `states/all`. Token auto‑refreshes with a safety skew.
 - Display uses `FastLED_NeoMatrix` with WS2812B strips; adjust tiling/orientation in hardware config.
+- Raspberry Pi API migration stubs are available in `config/APIConfiguration.h`:
+  - `USE_RPI_API_STUBS` toggles local-RPi path selection.
+  - `RPI_BASE_URL` + `RPI_FLIGHT_INFO_PATH` and `RPI_LOOKUP_PATH` are placeholders for flight/lookup APIs.
+  - `RPI_LOGO_BASE_URL` + `RPI_LOGO_PATH` is a separate logo endpoint placeholder.
