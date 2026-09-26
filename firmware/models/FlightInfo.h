@@ -26,4 +26,7 @@ struct FlightInfo
     // Human-friendly display strings
     String airline_display_name_full;
     String aircraft_display_name_short;
+
+    // Airline branding
+    String airline_logo_url;
 };

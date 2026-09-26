@@ -8,6 +8,29 @@ Outputs: Display name strings (short/full) via out parameters.
 */
 #include "adapters/FlightWallFetcher.h"
 
+bool FlightWallFetcher::getAirlineNameFromRpiStub(const String &airlineIcao, String &outDisplayNameFull)
+{
+    (void)airlineIcao;
+    outDisplayNameFull = String("");
+    Serial.print("FlightWallFetcher: RPI airline lookup stub selected (");
+    Serial.print(APIConfiguration::RPI_BASE_URL);
+    Serial.println(APIConfiguration::RPI_LOOKUP_PATH);
+    return false;
+}
+
+bool FlightWallFetcher::getAircraftNameFromRpiStub(const String &aircraftIcao,
+                                                   String &outDisplayNameShort,
+                                                   String &outDisplayNameFull)
+{
+    (void)aircraftIcao;
+    outDisplayNameShort = String("");
+    outDisplayNameFull = String("");
+    Serial.print("FlightWallFetcher: RPI aircraft lookup stub selected (");
+    Serial.print(APIConfiguration::RPI_BASE_URL);
+    Serial.println(APIConfiguration::RPI_LOOKUP_PATH);
+    return false;
+}
+
 bool FlightWallFetcher::httpGetJson(const String &url, String &outPayload)
 {
     WiFiClientSecure client;
@@ -33,6 +56,11 @@ bool FlightWallFetcher::httpGetJson(const String &url, String &outPayload)
 
 bool FlightWallFetcher::getAirlineName(const String &airlineIcao, String &outDisplayNameFull)
 {
+    if (APIConfiguration::USE_RPI_API_STUBS)
+    {
+        return getAirlineNameFromRpiStub(airlineIcao, outDisplayNameFull);
+    }
+
     outDisplayNameFull = String("");
     if (airlineIcao.length() == 0)
         return false;
@@ -59,6 +87,11 @@ bool FlightWallFetcher::getAircraftName(const String &aircraftIcao,
                                         String &outDisplayNameShort,
                                         String &outDisplayNameFull)
 {
+    if (APIConfiguration::USE_RPI_API_STUBS)
+    {
+        return getAircraftNameFromRpiStub(aircraftIcao, outDisplayNameShort, outDisplayNameFull);
+    }
+
     outDisplayNameShort = String("");
     outDisplayNameFull = String("");
     if (aircraftIcao.length() == 0)

@@ -32,6 +32,7 @@ private:
 
     void drawTextLine(int16_t x, int16_t y, const String &text, uint16_t color);
     String makeFlightLine(const FlightInfo &f);
+    String makeAirlineLogoBadgeText(const FlightInfo &f);
     String truncateToColumns(const String &text, int maxColumns);
     void displaySingleFlightCard(const FlightInfo &f);
     void displayLoadingScreen();

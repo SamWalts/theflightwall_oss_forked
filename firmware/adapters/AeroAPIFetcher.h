@@ -14,4 +14,8 @@ public:
     ~AeroAPIFetcher() override = default;
 
     bool fetchFlightInfo(const String &flightIdent, FlightInfo &outInfo) override;
+
+private:
+    bool fetchFlightInfoFromRpiStub(const String &flightIdent, FlightInfo &outInfo);
+    String makeRpiLogoUrl(const FlightInfo &flightInfo) const;
 };

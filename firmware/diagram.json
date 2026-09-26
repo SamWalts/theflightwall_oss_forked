@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "author": "TheFlightWall",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": -20.8, "left": -10.2, "attrs": {} },
+    {
+      "type": "wokwi-neopixel-matrix",
+      "id": "matrix",
+      "top": -285.95,
+      "left": 326.68,
+      "attrs": { "rows": "32", "cols": "64" }
+    }
+  ],
+  "connections": [
+    [ "esp:5V", "matrix:VCC", "red", [ "h96", "v-48" ] ],
+    [ "esp:GND.1", "matrix:GND", "black", [ "h105.6", "v-28.8" ] ],
+    [ "esp:5", "matrix:DIN", "green", [ "h201.6", "v9.6", "h38.4" ] ]
+  ],
+  "dependencies": {}
+}
