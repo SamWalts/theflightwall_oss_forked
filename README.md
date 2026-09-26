@@ -7,7 +7,7 @@ This is the open source version with some basic guides to the panels, mounting t
 **Don't feel like building one? Check out the offical product: [theflightwall.com](https://theflightwall.com)**
 
 ![Main Image](images/main-image.png)
-*Airline logo lookup will be added soon!*
+*Airline logo metadata from AeroAPI is now integrated into the firmware display path.*
 
 # Component List
 - Main components
@@ -104,6 +104,22 @@ The firmware can be built and uploaded to the ESP32 using [PlatformIO](https://p
    - Open the `firmware` folder in PlatformIO
    - Connect your ESP32 via USB
    - Click the "Upload" button (→) in the PlatformIO toolbar
+
+### Mock the display with Wokwi (macOS + VS Code)
+
+You can run a mock LED display without hardware using Wokwi:
+
+1. Open `firmware/` in VS Code.
+2. Build the `wokwi` PlatformIO environment.
+3. Start the simulator (Wokwi extension) from VS Code, or run locally:
+   - `cd firmware`
+   - `pio run -e wokwi`
+   - `wokwi-cli --interactive .`
+4. In serial monitor, use simple commands:
+   - `help`, `demo`, `stop`
+   - `flight 0`
+   - `msg HELLO`
+   - `load`, `clear`
 
 ### Customization
 

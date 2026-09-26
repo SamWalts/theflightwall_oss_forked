@@ -30,4 +30,8 @@ public:
 
 private:
     bool httpGetJson(const String &url, String &outPayload);
+    bool getAirlineNameFromRpiStub(const String &airlineIcao, String &outDisplayNameFull);
+    bool getAircraftNameFromRpiStub(const String &aircraftIcao,
+                                    String &outDisplayNameShort,
+                                    String &outDisplayNameFull);
 };

@@ -30,4 +30,7 @@ struct FlightInfo
     String aircraft_display_name_full;
     String enrichment_source;
     String enrichment_updated_at;
+
+    // Airline branding
+    String airline_logo_url;
 };
