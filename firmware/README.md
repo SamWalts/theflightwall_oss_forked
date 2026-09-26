@@ -28,6 +28,28 @@ This is a high-level overview of the firmware that powers TheFlightWall on ESP32
 ### Build
 - PlatformIO project: see `platformio.ini`.
 
+### Wokwi display mock (local macOS + VS Code)
+- Added a dedicated PlatformIO environment: `wokwi` (`-D WOKWI_DISPLAY_MOCK`).
+- The Wokwi wiring is defined in `diagram.json` and uses a simulated 64x32 NeoPixel matrix.
+
+CLI flow:
+1. `cd firmware`
+2. `pio run -e wokwi`
+3. `wokwi-cli --interactive .`
+
+VS Code flow:
+1. Open `firmware` in VS Code with PlatformIO + Wokwi extensions installed.
+2. Build `wokwi` environment.
+3. Run **Wokwi: Start Simulator** from the Command Palette.
+4. Open the serial monitor and use commands:
+   - `help`
+   - `demo`
+   - `stop`
+   - `flight 0`
+   - `msg HELLO`
+   - `load`
+   - `clear`
+
 ### Notes
 - OpenSky OAuth is required for `states/all`. Token auto‑refreshes with a safety skew.
 - Display uses `FastLED_NeoMatrix` with WS2812B strips; adjust tiling/orientation in hardware config.
