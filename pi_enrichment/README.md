@@ -5,6 +5,121 @@ Local Raspberry Pi service that:
 - Serves a local HTTP API for ADS-B ICAO (`hex`) enrichment.
 - Optionally enriches `readsb/tar1090` live `aircraft.json` output.
 
+## Test locally with Docker
+
+Run the enrichment API and FlightWall simulator on your local machine using
+three synthetic aircraft records. This mode requires no API keys, Raspberry Pi,
+receiver, or FAA registry download. Docker downloads the base image on the first
+build, so internet access is needed initially.
+
+### Prerequisites
+
+- Install and start Docker Desktop on macOS or Windows, or Docker Engine with
+  the Compose plugin on Linux.
+- Use a recent `docker compose` version that supports `up --wait`.
+- Install Python 3 on your machine to run the smoke tests below.
+- Make sure local ports `8080` and `8090` are available.
+
+Check your installation:
+
+```bash
+docker info
+docker compose version
+python3 --version
+```
+
+### Start the test stack
+
+Open a terminal at the repository root, the directory containing
+`docker-compose.yml`. If your terminal is in `pi_enrichment/` or `firmware/`, run
+`cd ..` first. Run all commands in this section from the repository root.
+
+```bash
+docker compose -f docker-compose.yml -f docker/compose.test.yml up --build -d --wait
+```
+
+This builds both services, imports
+[`docker/fixtures/aircraft_registry.csv`](../docker/fixtures/aircraft_registry.csv),
+and waits until both services are healthy. Test data is stored in a separate
+`flightwall_test_data` Docker volume; live FAA data uses `flightwall_data`.
+The test and live modes share container names and ports, so run one mode at a time.
+
+### Verify the results
+
+Run the five end-to-end smoke tests:
+
+```bash
+python3 docker/smoke_test.py
+```
+
+Expected result: `Ran 5 tests` followed by `OK`. These tests check registry
+readiness, known and unknown aircraft, enrichment of all three sample flights,
+and the simulator's display card. They expect the bundled fixture and
+[`flightwall_sim/sample_aircraft.json`](../flightwall_sim/sample_aircraft.json).
+
+You can also open these URLs in a browser or check them with `curl`:
+
+| URL | Expected result in test mode |
+| --- | --- |
+| <http://localhost:8080/health> | `status: "ok"`, `db_exists: true`, `stale: false` |
+| <http://localhost:8080/v1/meta> | `row_count: 3` |
+| <http://localhost:8080/v1/aircraft/A1B2C3> | `found: true`, operator `TEST UNITED`, model `737-800` |
+| <http://localhost:8080/v1/aircraft/FFFFFF> | `found: false` |
+| <http://localhost:8090/v1/flights> | Three enriched flights with `found: true` |
+| <http://localhost:8090/v1/display/current> | `UAL123` / `TEST UNITED` / `A1B2C3:737-800` |
+
+```bash
+curl --fail http://localhost:8080/v1/aircraft/A1B2C3
+curl --fail http://localhost:8090/v1/display/current
+```
+
+The simulator exposes JSON display output. For ESP32 builds and LED display
+simulation, see the [firmware guide](../firmware/README.md). `/v1/aircraft/live` requires
+a configured `readsb/tar1090` receiver and is not used by this Docker test mode.
+
+### Logs, stop, and restart
+
+Inspect status and recent logs:
+
+```bash
+docker compose -f docker-compose.yml -f docker/compose.test.yml ps
+docker compose -f docker-compose.yml -f docker/compose.test.yml logs --tail=50
+```
+
+Stop the stack while keeping test data:
+
+```bash
+docker compose -f docker-compose.yml -f docker/compose.test.yml down
+```
+
+Restart with the same `up --build -d --wait` command above. To delete the test
+volume as well, use `down -v` with the same two Compose files; the next start
+imports the fixture again.
+
+If startup fails, confirm Docker is running, check the logs, and make sure
+another application is not using ports `8080` or `8090`. If you change the sample
+flights or fixture, rebuild/restart the stack; the bundled smoke tests still
+expect the original sample records.
+
+### Optional: test with live FAA registry data
+
+Stop the fixture stack first, then start the base configuration:
+
+```bash
+docker compose -f docker-compose.yml -f docker/compose.test.yml down
+docker compose -f docker-compose.yml up --build -d
+docker compose -f docker-compose.yml logs -f pi-enrichment
+```
+
+This downloads and imports the FAA registry before starting the enrichment API,
+which can take several minutes. If the download returns HTTP 403 or another
+network error, use the fixture mode above for local tests. The fixture smoke
+tests are intended for test mode; live FAA records may not match the sample
+ICAO values or synthetic operator/model names.
+
+Stop live mode with `docker compose -f docker-compose.yml down`.
+See the [Docker guide](../docker/README.md) for more operations.
+
 ## JSON contract
 
 ### `GET /v1/aircraft/{adsb_icao}`
@@ -46,6 +161,8 @@ Unknown ICAO example:
 - `GET /v1/aircraft/live`: reads `tar1090/data/aircraft.json` and enriches each aircraft by `hex`.
 
 ## FAA sync pipeline
+
+The following manual Python and systemd commands assume the repository root.
 
 Script: `faa_pipeline.py`
 

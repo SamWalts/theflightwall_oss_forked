@@ -63,7 +63,13 @@ def extract_csv_or_txt(downloaded_path: Path) -> Path:
             ]
             if not candidates:
                 raise RuntimeError("ZIP did not contain CSV/TXT file")
-            selected = sorted(candidates)[0]
+            # The FAA ZIP also contains reference and deregistration tables.
+            # Only MASTER contains the active aircraft registration records.
+            master_files = [
+                name for name in candidates
+                if Path(name).name.lower() in ("master.txt", "master.csv")
+            ]
+            selected = sorted(master_files or candidates)[0]
             fd, out_path = tempfile.mkstemp(prefix="faa_extract_", suffix=Path(selected).suffix)
             os.close(fd)
             out = Path(out_path)

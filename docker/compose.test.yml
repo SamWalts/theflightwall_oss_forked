@@ -1,0 +1,36 @@
+# Apply after docker-compose.yml for repeatable tests without an FAA download.
+services:
+  pi-enrichment:
+    environment:
+      FAA_CSV_URL: file:///fixtures/aircraft_registry.csv
+    volumes:
+      - flightwall_test_data:/data
+      - ./docker/fixtures/aircraft_registry.csv:/fixtures/aircraft_registry.csv:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; data = json.load(urllib.request.urlopen('http://localhost:8080/health', timeout=3)); assert data['db_exists'] and not data['stale']"
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+
+  flightwall-sim:
+    depends_on:
+      pi-enrichment:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; data = json.load(urllib.request.urlopen('http://localhost:8090/v1/flights', timeout=3)); assert data['updated_at'] and data['source_count'] > 0"
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+
+volumes:
+  flightwall_test_data:
