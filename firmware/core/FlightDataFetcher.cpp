@@ -39,15 +39,63 @@ size_t FlightDataFetcher::fetchFlights(std::vector<StateVector> &outStates,
         if (_flightFetcher->fetchFlightInfo(s.callsign, info))
         {
             FlightWallFetcher fw;
+            if (s.icao24.length())
+            {
+                String registration;
+                String operatorName;
+                String operatorIcao;
+                String aircraftModel;
+                String aircraftType;
+                String source;
+                String updatedAt;
+                bool found = false;
+                if (fw.getAircraftEnrichmentByAdsbIcao(s.icao24,
+                                                       registration,
+                                                       operatorName,
+                                                       operatorIcao,
+                                                       aircraftModel,
+                                                       aircraftType,
+                                                       source,
+                                                       updatedAt,
+                                                       found) &&
+                    found)
+                {
+                    if (registration.length())
+                    {
+                        info.registration = registration;
+                    }
+                    if (operatorName.length())
+                    {
+                        info.airline_display_name_full = operatorName;
+                    }
+                    if (operatorIcao.length())
+                    {
+                        info.operator_icao = operatorIcao;
+                    }
+                    if (aircraftModel.length())
+                    {
+                        info.aircraft_display_name_short = aircraftModel;
+                        info.aircraft_display_name_full = aircraftModel;
+                    }
+                    if (aircraftType.length())
+                    {
+                        info.aircraft_code = aircraftType;
+                    }
+                    info.enrichment_source = source;
+                    info.enrichment_updated_at = updatedAt;
+                }
+            }
+
             if (info.operator_icao.length())
             {
                 String airlineFull;
-                if (fw.getAirlineName(info.operator_icao, airlineFull))
+                if (info.airline_display_name_full.length() == 0 &&
+                    fw.getAirlineName(info.operator_icao, airlineFull))
                 {
                     info.airline_display_name_full = airlineFull;
                 }
             }
-            if (info.aircraft_code.length())
+            if (info.aircraft_code.length() && info.aircraft_display_name_short.length() == 0)
             {
                 String aircraftShort, aircraftFull;
                 if (fw.getAircraftName(info.aircraft_code, aircraftShort, aircraftFull))
@@ -55,6 +103,10 @@ size_t FlightDataFetcher::fetchFlights(std::vector<StateVector> &outStates,
                     if (aircraftShort.length())
                     {
                         info.aircraft_display_name_short = aircraftShort;
+                    }
+                    if (aircraftFull.length())
+                    {
+                        info.aircraft_display_name_full = aircraftFull;
                     }
                 }
             }

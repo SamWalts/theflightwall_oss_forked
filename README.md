@@ -55,6 +55,11 @@ The data for this project consists of two main data sources:
 1. Core public [ADS-B](https://en.wikipedia.org/wiki/Automatic_Dependent_Surveillance%E2%80%93Broadcast) data for flight positions and callsigns - using [OpenSky](https://opensky-network.org)
 2. Flight information lookup - aircraft, airline, and route (origin/destination airport). This is typically the hardest / most expensive information to find. Using [FlightAware AeroAPI](https://flightaware.com/aeroapi)
 
+Optional local enrichment:
+- Run the Raspberry Pi FAA enrichment API to map ADS-B ICAO (`hex`) to operator and model data.
+- See [pi_enrichment/README.md](pi_enrichment/README.md) for API contract, FAA sync pipeline, and systemd setup.
+- For one-machine Docker testing of both Pi enrichment and a FlightWall simulator, see [docker/README.md](docker/README.md).
+
 ### Setting up OpenSky
 1. Register for an [OpenSky](https://opensky-network.org/) account
 2. Go to your [account page](https://opensky-network.org/my-opensky/account)

@@ -19,6 +19,9 @@ namespace APIConfiguration
     // FlightWall CDN lookup
     static constexpr const char *FLIGHTWALL_CDN_BASE_URL = "https://cdn.theflightwall.com";
 
+    // Optional local Pi enrichment service (e.g. http://192.168.1.50:8080)
+    static constexpr const char *PI_ENRICHMENT_BASE_URL = "";
+
     // Raspberry Pi local API stubs (future migration target)
     // Enable this to route fetchers through local endpoints once implemented.
     static const bool USE_RPI_API_STUBS = false;
