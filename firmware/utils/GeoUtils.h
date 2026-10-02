@@ -41,3 +41,6 @@ inline void centeredBoundingBox(double lat, double lon, double radiusKm,
     lonMin = lon - lonDelta;
     lonMax = lon + lonDelta;
 }
+
+
+
