@@ -1,3 +1,8 @@
+> Local migration has begun: the live ESP32 firmware now uses the Pi's
+> `/v1/flights` endpoint without OpenSky/AeroAPI/CDN fallback. See
+> [firmware setup](firmware/README.md) and the [local feed contract](docs/local-flight-api.md).
+> The cloud setup instructions below describe the legacy implementation.
+
 # TheFlightWall
 
 TheFlightWall is an LED wall which shows live information of flights going by your window.

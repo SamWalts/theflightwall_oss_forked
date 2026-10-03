@@ -2,32 +2,32 @@
 
 This is a high-level overview of the firmware that powers TheFlightWall on ESP32.
 
-### What it does
-- **Fetch nearby aircraft** from OpenSky Network using OAuth (states/all) filtered by location, radius, and bearing.
-- **Enrich flights** with readable airline/aircraft info and airline logo metadata from AeroAPI/TheFlightWall CDN.
-- **Render** a clean, minimal three-line flight card on a WS2812B LED matrix.
+### Local flight data
 
-### Key components
-- **src/main.cpp**: Entry point. Initializes serial, Wi‑Fi, fetchers, and display. Periodically fetches/enriches and renders.
-- **core/FlightDataFetcher**: Orchestrates: fetch state vectors → fetch flight metadata → enrich names.
-- **adapters/OpenSkyFetcher**: Queries OpenSky states/all with OAuth; parses and filters by geo.
-- **adapters/AeroAPIFetcher**: Retrieves flight details by ident via AeroAPI.
-- **adapters/FlightWallFetcher**: Looks up airline/aircraft names from CDN and optional local Pi enrichment service.
-- **adapters/NeoMatrixDisplay**: Draws bordered, centered three‑line flight card; cycles flights; shows loading.
-- **config/**: User/API/timing/hardware/Wi‑Fi settings.
-- **models/**: Lightweight structs for `StateVector`, `FlightInfo`, `AirportInfo`.
-- **utils/GeoUtils.h**: Haversine distance and bounding boxes.
+The live firmware polls `GET /v1/flights` from the Raspberry Pi every two seconds.
+OpenSky, AeroAPI, and FlightWall CDN adapters are retained as legacy source files
+but excluded from both PlatformIO builds. LAN failures have no external fallback.
+Aircraft without callsigns or reference matches remain displayable using their hex
+address. Local cards show identifier/type, barometric altitude/ground speed, and
+vertical speed; absent telemetry displays `?`.
 
-### Configuration quickstart
-- Set Wi‑Fi in `config/WiFiConfiguration.h`.
-- Set location and display preferences in `config/UserConfiguration.h`.
-- Set intervals in `config/TimingConfiguration.h`.
-- Set display dimensions/pin in `config/HardwareConfiguration.h`.
-- Provide API credentials/URLs in `config/APIConfiguration.h` (OpenSky OAuth, AeroAPI key, CDN base, optional `PI_ENRICHMENT_BASE_URL`).
+Set Wi-Fi in `config/WiFiConfiguration.h` and `RPI_BASE_URL` in
+`config/APIConfiguration.h` to the Pi's LAN address and port, for example
+`http://192.168.1.50:8080`. Use the IP if `.local` DNS is unavailable.
+Set display wiring/brightness in the hardware and user configuration headers.
+The first local feed uses all fresh positioned aircraft received by the Pi, capped
+at eight; the old compiled San Francisco location is not applied.
 
-### Optional local Pi enrichment
-- Set `PI_ENRICHMENT_BASE_URL` in `config/APIConfiguration.h` to your Pi service (for example `http://192.168.1.50:8080`).
-- Firmware will query `GET /v1/aircraft/{adsb_icao}` first and fall back to CDN enrichment when local data is unavailable.
+The Pi runs `pi_enrichment/server.py`; see its README and
+[local feed contract](../docs/local-flight-api.md). The display distinguishes Wi-Fi
+disconnected, Pi unavailable (including unusable feed), receiver stale, and healthy
+no-aircraft. The `wokwi` environment remains a display-only mock; it does not test
+the Pi HTTP adapter.
+
+Pi address and Wi-Fi are still compiled settings. NVS/BLE provisioning, geographic
+filtering, airline reference resolution, actual local logo assets, and full
+IAS/TAS display are follow-up milestones in the implementation plan. Hardware
+operation has not been validated by the Python tests.
 
 ### Build
 - PlatformIO project: see `platformio.ini`.
@@ -55,9 +55,5 @@ VS Code flow:
    - `clear`
 
 ### Notes
-- OpenSky OAuth is required for `states/all`. Token auto‑refreshes with a safety skew.
 - Display uses `FastLED_NeoMatrix` with WS2812B strips; adjust tiling/orientation in hardware config.
-- Raspberry Pi API migration stubs are available in `config/APIConfiguration.h`:
-  - `USE_RPI_API_STUBS` toggles local-RPi path selection.
-  - `RPI_BASE_URL` + `RPI_FLIGHT_INFO_PATH` and `RPI_LOOKUP_PATH` are placeholders for flight/lookup APIs.
-  - `RPI_LOGO_BASE_URL` + `RPI_LOGO_PATH` is a separate logo endpoint placeholder.
+- Build both environments with `pio run -e esp32dev -e wokwi`.

@@ -27,6 +27,7 @@ private:
     uint16_t _matrixHeight = 0;
     uint32_t _numPixels = 0;
 
+    String _selectedHex;
     size_t _currentFlightIndex = 0;
     unsigned long _lastCycleMs = 0;
 

@@ -187,6 +187,15 @@ void NeoMatrixDisplay::displaySingleFlightCard(const FlightInfo &f)
 
     String line3 = f.aircraft_display_name_short.length() ? f.aircraft_display_name_short : f.aircraft_code;
 
+    if (f.local_feed)
+    {
+        airline = f.ident;
+        if (f.aircraft_code.length()) airline += " " + f.aircraft_code;
+        line2 = f.on_ground ? String("GROUND") : (String("ALT ") + (isnan(f.altitude_baro_ft) ? String("?") : String(f.altitude_baro_ft, 0)) + "ft");
+        line2 += String(" GS ") + (isnan(f.ground_speed_kt) ? String("?") : String(f.ground_speed_kt, 0)) + "kt";
+        line3 = String("VS ") + (isnan(f.vertical_speed_fpm) ? String("?") : String(f.vertical_speed_fpm, 0)) + "ft/min";
+    }
+
     int line1MaxCols = maxCols;
     if (hasAirlineLogoUrl)
     {
@@ -241,6 +250,12 @@ void NeoMatrixDisplay::displayFlights(const std::vector<FlightInfo> &flights)
         const unsigned long now = millis();
         const unsigned long intervalMs = TimingConfiguration::DISPLAY_CYCLE_SECONDS * 1000UL;
 
+        // Keep the selected local aircraft through snapshot reordering.
+        if (_selectedHex.length())
+        {
+            for (size_t i = 0; i < flights.size(); ++i)
+                if (flights[i].adsb_icao == _selectedHex) { _currentFlightIndex = i; break; }
+        }
         if (flights.size() > 1)
         {
             if (now - _lastCycleMs >= intervalMs)
@@ -255,6 +270,7 @@ void NeoMatrixDisplay::displayFlights(const std::vector<FlightInfo> &flights)
         }
 
         const size_t index = _currentFlightIndex % flights.size();
+        _selectedHex = flights[index].adsb_icao;
         displaySingleFlightCard(flights[index]);
     }
     else

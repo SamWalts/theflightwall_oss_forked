@@ -212,3 +212,11 @@ sudo systemctl enable --now flightwall-faa-sync.timer
 - FAA feed column names can vary; the importer maps multiple likely header names.
 - If operator ICAO is not present in FAA source, `operator_icao` will be empty.
 - API is local-network oriented and intentionally simple for Pi 4 devices.
+
+## Local flight feed
+
+`GET /v1/flights` now supplies the ESP32's production data path from local readsb.
+Prefer `--aircraft-path` (or `READSB_AIRCRAFT_PATH`) with your confirmed receiver
+JSON path. It operates without a registry database or cloud API keys. See
+[the versioned contract and receiver handoff](../docs/local-flight-api.md).
+Existing lookup and live-enrichment endpoints retain their original behavior.
