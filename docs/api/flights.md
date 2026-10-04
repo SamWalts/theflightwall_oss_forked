@@ -1,8 +1,12 @@
 # Flight feed: Pi → ESP32
 
 M1 draft **0.1**, 2026-10-03. Proposed `GET /v1/flights`, schema version 1.
-The existing server does not implement this endpoint and the ESP32 does not yet
-parse it. The [producer schema](flights-v1.schema.json) and
+The server and ESP32 implement [an initial prototype](../local-flight-api.md) at
+this path, with a flat envelope, Unix-second timestamps and `ok` receiver status.
+They do not implement this canonical M1 shape. Both currently use
+`schema_version=1`; consumers must validate the envelope, and the wire
+migration/version must be resolved before M1 freeze.
+The [producer schema](flights-v1.schema.json) and
 [synthetic fixtures](../../tests/fixtures/m1/README.md) define this draft together.
 The human rules below cover relationships JSON Schema cannot express.
 

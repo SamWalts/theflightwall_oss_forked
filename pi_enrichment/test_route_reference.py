@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import route_pipeline as pipeline
+from flight_feed import FlightFeed
 from route_reference import RouteStore, normalize_callsign, read_pointer
 from server import BoundedHTTPServer, EnrichmentRequestHandler, EnrichmentStore
 
@@ -218,9 +219,16 @@ class RouteReferenceTests(unittest.TestCase):
                 session.conn.execute("DELETE FROM routes")
 
     def test_api_works_without_wan_or_faa_and_exposes_unknowns(self):
+        snapshot_path = self.root / "aircraft.json"
+        snapshot_path.write_text(json.dumps({"now": 1000, "aircraft": [
+            {"hex": "a1b2c3", "flight": " BAW117 ", "lat": 40, "lon": -75, "seen": 0.2, "seen_pos": 1},
+            {"hex": "ffffff", "lat": 40, "lon": -75, "seen": 0.2, "seen_pos": 1},
+        ]}))
+
         class Handler(EnrichmentRequestHandler):
             store = EnrichmentStore(self.root / "missing-faa.sqlite3")
             route_store = self.store
+            feed = FlightFeed(store, aircraft_path=snapshot_path, clock=lambda: 1000)
 
             def _fetch_live_aircraft(handler):
                 return [{"hex": "A1B2C3", "flight": " BAW117 "}, {"hex": "FFFFFF"}]
@@ -244,9 +252,18 @@ class RouteReferenceTests(unittest.TestCase):
                 live = json.load(response)
             self.assertEqual(live["count"], 2)
             self.assertIsNone(live["aircraft"][1]["route_resolution"]["route_reference"])
+            with opener.open(base + "/v1/flights") as response:
+                flights = json.load(response)
+            self.assertEqual(flights["receiver_status"], "ok")
+            self.assertEqual([row["adsb_icao"] for row in flights["flights"]], ["A1B2C3", "FFFFFF"])
+            self.assertIsNone(flights["flights"][1]["callsign"])
+            self.assertIsNone(flights["flights"][0]["origin"])
             for endpoint in ("/health", "/v1/meta"):
                 with opener.open(base + endpoint) as response:
-                    self.assertEqual(json.load(response)["route_reference"]["status"], "ready")
+                    diagnostics = json.load(response)
+                self.assertEqual(diagnostics["route_reference"]["status"], "ready")
+                if endpoint == "/health":
+                    self.assertEqual(diagnostics["receiver_status"], "ok")
             for query in ("?lat=nan&lon=0", "?lat=0", "?hex=INVALID", "?hex=A1B2C3&hex=FFFFFF"):
                 with self.assertRaises(urllib.error.HTTPError) as error:
                     opener.open(base + "/v1/routes/BAW117" + query)

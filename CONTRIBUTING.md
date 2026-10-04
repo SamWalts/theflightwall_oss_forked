@@ -2,7 +2,9 @@
 
 Begin with [architecture.md](architecture.md), [AGENTS.md](AGENTS.md), and the
 [implementation checklist](docs/implementation-plan.md). The current Docker flow
-tests synthetic enrichment; the planned production telemetry API is still pending.
+tests synthetic enrichment. An initial local telemetry API/parser exists, but
+adoption of the [M1 contract](docs/api/README.md) remains pending; the current
+prototype is documented in [the initial local API](docs/local-flight-api.md).
 The [route lookup research](docs/route-detection.md) documents the CC0 source and
 the implemented route slice of M4. See the [route contract](docs/api/routes.md)
 and [Pi operating guide](pi_enrichment/README.md) for import/lookup/rollback
@@ -85,17 +87,19 @@ See [validation scope](docs/api/validation.md): it does not execute receiver,
 HTTP, simulator or firmware behavior. Application tests are unnecessary for a
 documentation-only task.
 
-## Importer regression checks
+## Pi regression checks
 
 ```bash
 python3 -B -m unittest discover -s pi_enrichment -p 'test_*.py' -v
 ```
 
-Current result: **19 tests pass**: three existing FAA tests and sixteen route
-checks covering normalization, ambiguity, partitions, long sequences, missing
+Current result: **25 tests pass**: three FAA tests, six initial flight-feed tests
+and sixteen route checks. Feed checks cover partial telemetry, units, frozen and
+malformed snapshots, invalid values, caching and the candidate cap. Route checks
+cover normalization, ambiguity, partitions, long sequences, missing
 joins/files, failed updates, pinned readers, rollback, overrides/expiry, geography,
 read-only cache limits, gzip truncation/CRC failures, HTTP worker limits, and the
-HTTP API with application WAN calls forbidden.
+combined flight/route HTTP API with application WAN calls forbidden.
 Real receiver freshness, route correctness for today's traffic, and Pi hardware
 resource use remain separate acceptance work.
 

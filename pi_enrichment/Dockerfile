@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-COPY pi_enrichment/server.py pi_enrichment/faa_pipeline.py pi_enrichment/route_reference.py pi_enrichment/route_pipeline.py ./
+COPY pi_enrichment/server.py pi_enrichment/faa_pipeline.py pi_enrichment/flight_feed.py pi_enrichment/route_reference.py pi_enrichment/route_pipeline.py ./
 COPY pi_enrichment/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

@@ -87,9 +87,15 @@ the current diagnostic resolver uses the Pi wall clock without that new signal.
 ## 4. Health/meta and simulator
 
 Existing `/health` and `/v1/meta` fields retain their legacy FAA meanings.
+`/health` additionally exposes the prototype `receiver_status` (`ok`, `stale`,
+`unavailable`); that field differs from M1's nested receiver object.
 Additive receiver/capability/general-manifest summaries are described in
 [health/meta](health-and-metadata.md). The legacy `stale` flag never becomes
 a receiver/card expiry signal.
+
+The implemented [initial local feed](../local-flight-api.md) on port 8080 is also
+distinct from the canonical M1 draft. The shared version number does not establish
+wire compatibility; the migration/version must be resolved before freeze.
 
 Port 8090 belongs to the development simulator/preview. Its existing synthetic
 `/v1/flights` is not the production contract on port 8080. M2/M3 migration must
@@ -110,7 +116,9 @@ prove only the baseline synthetic enrichment flow.
   dumps or credentials. Neither an error response nor a legacy timestamp revives
   a cached aircraft.
 - Do not delete cloud firmware adapters as part of M1. M3 introduces a Pi-only
-  production path and verifies that its runtime cannot call those adapters.
+  production path and verifies that its runtime cannot call those adapters. The
+  prototype now uses the Pi and excludes legacy adapters from its build; firmware
+  build/physical acceptance and the rest of M3 remain pending.
 
 Source/API migration acceptance still requires actual compatibility checks when
 M2/M3 code changes. M1 provides definitions and fixtures, not deployed replacements.

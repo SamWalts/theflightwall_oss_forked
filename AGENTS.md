@@ -10,7 +10,8 @@
    data source, protocol, or release requirement.
    For M1/M2/M3/M6, read the [contract index](docs/api/README.md), relevant schema,
    [shared examples](tests/fixtures/m1/README.md) and [join rules](docs/api/enrichment-joins.md).
-   Draft 0.1 is checked documentation, not an implemented feed or firmware parser.
+   Draft 0.1 is checked documentation. The implemented prototype feed/parser
+   follows [the initial local API](docs/local-flight-api.md), not this draft.
 4. Run `git status --short --branch` and preserve unrelated user changes.
 5. Use [CONTRIBUTING.md](CONTRIBUTING.md) for setup and validation commands.
 
@@ -19,8 +20,9 @@ than creating a worktree unless the user requests one.
 
 ## Project rules
 
-- Current firmware still uses OpenSky/AeroAPI/CDN. The target architecture is local
-  readsb → Pi → ESP32. Do not mistake planned behavior for implemented behavior.
+- Current firmware uses the initial local Pi feed; cloud adapters remain legacy
+  source excluded from the build. The prototype is incompatible with the M1
+  draft despite sharing `schema_version=1`. Canonical migration remains M2/M3.
 - Keep flight operation independent of WAN, cloud APIs, and reference downloads.
   New local production code must not silently fall back to external adapters.
 - Reuse the existing readsb/SDR installation. Discover real paths and coordinates;

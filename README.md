@@ -1,3 +1,8 @@
+> Local migration has begun: the live ESP32 firmware now uses the Pi's
+> `/v1/flights` endpoint without OpenSky/AeroAPI/CDN fallback. See
+> [firmware setup](firmware/README.md) and the [local feed contract](docs/local-flight-api.md).
+> The cloud setup instructions below describe the legacy implementation.
+
 # TheFlightWall
 
 TheFlightWall is an LED wall which shows live information of flights going by your window.
@@ -6,7 +11,8 @@ The planned migration to a local readsb → Pi → ESP32 system is documented in
 [architecture.md](architecture.md). Follow the [implementation checklist](docs/implementation-plan.md)
 and [development guide](CONTRIBUTING.md); AI contributors should start with
 [AGENTS.md](AGENTS.md) and [project context](docs/project-context.md). The software
-setup below describes the current cloud-based firmware, not the completed migration.
+setup below describes the legacy cloud firmware. The initial local feed and
+firmware parser differ from the M1 draft; canonical migration remains pending.
 See [route lookup research](docs/route-detection.md) for free callsign-to-airport
 reference data suitable for overhead flights and Google/manual verification.
 The Pi now implements [offline route import and lookup](pi_enrichment/README.md#offline-departuredestination-lookup)
@@ -22,7 +28,8 @@ This is the open source version with some basic guides to the panels, mounting t
 **Don't feel like building one? Check out the offical product: [theflightwall.com](https://theflightwall.com)**
 
 ![Main Image](images/main-image.png)
-*Airline logo metadata from AeroAPI is now integrated into the firmware display path.*
+*Original wall photo. AeroAPI logo metadata belongs to the legacy firmware;
+the initial local feed does not yet supply airline logos.*
 
 # Component List
 - Main components
@@ -82,7 +89,7 @@ Optional local enrichment:
 
 
 ### Setting up AeroAPI
-1. Go to the [FlightAware AeroAPI]([https://flightaware.com/aeroapi](https://flightaware.com/aeroapi)) page and create a personal account
+1. Go to the [FlightAware AeroAPI](https://flightaware.com/aeroapi) page and create a personal account
 3. From the dashboard, open **API Keys**, click **Create API Key** and follow the steps
 8. Copy the generated key and add it to [APIConfiguration.h](firmware/config/APIConfiguration.h)
 

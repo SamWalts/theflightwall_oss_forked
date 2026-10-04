@@ -36,8 +36,10 @@ details may remain an explicitly pending integration prerequisite while M1 proce
 
 Status: partial: detailed draft 0.1 contracts, three versioned producer schemas,
 shared synthetic examples and offline documentation checks are present. The
-diagnostic route object is implemented; the full feed and firmware parser are
-not implemented or frozen. Receiver and ESP32 measurements remain pending.
+diagnostic route object is implemented; the canonical feed and parser are not
+implemented or frozen. Main's initial local feed/parser is integrated into dev
+but uses [a different prototype shape](local-flight-api.md). Receiver and ESP32
+measurements remain pending.
 Depends on repository inspection in M0.
 Original plan: step 1.
 
@@ -76,7 +78,10 @@ confirmed by fixtures or explicitly revised with rationale.
 
 ## M2 — Implement the cached readsb flight API
 
-Status: planned. Depends on M1. Original plan: step 3 and startup parts of step 9.
+Status: partial prototype: cached file/HTTP input and a flat `/v1/flights` exist.
+Canonical M1 normalization, progress/clock rules, filters, byte bounds and replay
+remain pending; unchecked items below require that full contract.
+Depends on M1. Original plan: step 3 and startup parts of step 9.
 
 - [ ] Add local-file input plus an explicitly configured loopback adapter if needed.
 - [ ] Cache bounded snapshots, normalize telemetry, and preserve source ages.
@@ -95,7 +100,10 @@ when access is available; keep that hardware evidence separate.
 
 ## M3 — Prove the minimal ESP32 local flight path
 
-Status: planned. Depends on M1, M2, and the M0 toolchain baseline.
+Status: partial prototype: a bounded initial Pi adapter, nullable basic telemetry,
+local cards and connection/stale/empty messages exist. Cloud adapters are excluded
+from the build. Canonical parsing, expiry, selection, firmware builds and physical
+acceptance remain pending. Depends on M1, M2, and the M0 toolchain baseline.
 Original plan: step 7 and the minimal portion of step 8.
 
 - [ ] Introduce a Pi feed adapter and extend the flight model for nullable telemetry,

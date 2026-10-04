@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, List
 from urllib.parse import parse_qs, unquote, urlsplit
 
+from flight_feed import FlightFeed
 from route_reference import RouteStore, RouteSession, HEX_RE
 
 DEFAULT_DATA_DIR = Path.home() / ".flightwall-pi"
@@ -164,6 +165,7 @@ class EnrichmentStore:
 
 
 class EnrichmentRequestHandler(BaseHTTPRequestHandler):
+    feed: FlightFeed = None
     store: EnrichmentStore = None
     route_store: RouteStore = None
     route_max_excess_km: float = 2000
@@ -180,6 +182,8 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
+        if path == "/v1/flights":
+            return self._write_json(self.feed.flights())
         if path == "/health":
             return self._handle_health()
         if path == "/v1/meta":
@@ -202,6 +206,7 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
         self._write_json(
             {
                 "status": "ok",
+                "receiver_status": self.feed.flights()["receiver_status"],
                 "db_exists": meta.get("db_exists", False),
                 "last_sync_at": meta.get("last_sync_at", ""),
                 "stale": stale,
@@ -366,6 +371,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--host", default=os.getenv("FLIGHTWALL_PI_HOST", "0.0.0.0"))
     parser.add_argument("--port", type=int, default=int(os.getenv("FLIGHTWALL_PI_PORT", "8080")))
     parser.add_argument("--db-path", type=Path, default=Path(os.getenv("FAA_DB_PATH", str(DEFAULT_DB_PATH))))
+    parser.add_argument("--aircraft-path", type=Path, default=os.getenv("READSB_AIRCRAFT_PATH"),
+                        help="Local readsb aircraft.json; takes precedence over HTTP")
     parser.add_argument("--tar1090-url", default=os.getenv("TAR1090_AIRCRAFT_URL", DEFAULT_TAR1090_URL))
     parser.add_argument("--stale-after-hours", type=int, default=int(os.getenv("STALE_AFTER_HOURS", "72")))
     parser.add_argument("--route-data-dir", type=Path, default=Path(os.getenv("ROUTE_DATA_DIR", str(DEFAULT_ROUTE_DATA_DIR))))
@@ -384,6 +391,7 @@ def main() -> int:
         raise ValueError("route-max-excess-km must be in 0–40000")
     EnrichmentRequestHandler.route_store = RouteStore(args.route_data_dir)
     EnrichmentRequestHandler.route_max_excess_km = args.route_max_excess_km or None
+    EnrichmentRequestHandler.feed = FlightFeed(EnrichmentRequestHandler.store, args.aircraft_path, args.tar1090_url)
     EnrichmentRequestHandler.tar1090_url = args.tar1090_url
     EnrichmentRequestHandler.stale_after_hours = args.stale_after_hours
 

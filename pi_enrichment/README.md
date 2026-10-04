@@ -248,7 +248,8 @@ Unknown ICAO example:
 ```
 
 ### Other endpoints
-- `GET /health`: service health + stale flag.
+- `GET /health`: service health, legacy FAA stale flag and prototype receiver status.
+- `GET /v1/flights`: cached initial local flight feed; see the prototype below.
 - `GET /v1/meta`: schema/version/checksum/row count sync metadata.
 - `GET /v1/aircraft/live`: reads `tar1090/data/aircraft.json` and enriches each aircraft by `hex`.
 - `GET /v1/routes/{callsign}`: local route reference/override lookup; see the
@@ -307,3 +308,14 @@ sudo systemctl enable --now flightwall-faa-sync.timer
 - FAA feed column names can vary; the importer maps multiple likely header names.
 - If operator ICAO is not present in FAA source, `operator_icao` will be empty.
 - API is local-network oriented and intentionally simple for Pi 4 devices.
+
+## Local flight feed
+
+`GET /v1/flights` now supplies the ESP32's production data path from local readsb.
+Prefer `--aircraft-path` (or `READSB_AIRCRAFT_PATH`) with your confirmed receiver
+JSON path. It operates without a registry database or cloud API keys. See
+[the versioned contract and receiver handoff](../docs/local-flight-api.md).
+Existing lookup and live-enrichment endpoints retain their original behavior.
+This flat prototype does not conform to the nested [M1 draft](../docs/api/README.md),
+despite sharing `schema_version=1`. Canonical migration and route/logo integration
+remain pending.

@@ -6,6 +6,13 @@
 
 struct FlightInfo
 {
+    String adsb_icao;
+    bool local_feed = false;
+    bool on_ground = false;
+    double altitude_baro_ft = NAN;
+    double ground_speed_kt = NAN;
+    double vertical_speed_fpm = NAN;
+
     // Flight identifiers
     String ident;
     String ident_icao;

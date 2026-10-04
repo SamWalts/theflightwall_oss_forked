@@ -1,7 +1,8 @@
 # API health and reference metadata contracts
 
 M1 draft **0.1**, 2026-10-03. Existing FAA/route fields below are implemented.
-Receiver/capability/general-manifest additions are proposed for M2/M4/M6 and
+The prototype also adds `receiver_status`; canonical receiver/capability and
+general-manifest additions are proposed for M2/M4/M6 and
 must not be advertised as present before their runtime exists. These endpoints
 are diagnostics; the ESP32's normal card loop consumes the flight envelope.
 
@@ -17,6 +18,7 @@ Current response shape is illustrated by:
 ```json
 {
   "status": "ok",
+  "receiver_status": "unavailable",
   "db_exists": false,
   "last_sync_at": "",
   "stale": true,
@@ -40,6 +42,7 @@ researched BAW/UAL import, not live traffic.
 | Existing field | Semantics |
 | --- | --- |
 | `status` | Process/API health, currently `ok` for a handled response. |
+| `receiver_status` | Initial feed status: `ok`, `stale` or `unavailable`. This is not the canonical nested M1 receiver state. See [prototype API](../local-flight-api.md). |
 | `db_exists` | Legacy FAA registry file presence; not reference-data validity. |
 | `last_sync_at` | Legacy FAA sync timestamp string, empty when unknown. |
 | `stale` | Legacy FAA age flag using `STALE_AFTER_HOURS`, default 72. It is not receiver expiry or route accuracy. |

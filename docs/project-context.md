@@ -1,7 +1,9 @@
 # Project context and handoff
 
-Last updated: 2026-10-04. Source baseline:
-`500a49c67a73bb4d9ea3da131115bdaf4db84dec`.
+Last updated: 2026-10-04. Original architecture-review baseline:
+`500a49c67a73bb4d9ea3da131115bdaf4db84dec`. Dev now includes main's initial
+local-feed commit `8418bdc974a15c813f567ef136ac1126e12e35e8` alongside its route
+implementation and M1 draft. Consult Git history for the resulting merge commit.
 Recheck the checkout and runtime before relying on this snapshot.
 
 ## Goal
@@ -32,8 +34,8 @@ import on the Pi; local landing observations are a separate optional feature.
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Reproducible development commands and evidence requirements. |
 | [Original plan](flightwall-local-plan.md) | October 1 source plan, reference links, and detailed task prompts. |
 
-The original README explains the current cloud/hardware setup. It does not mean
-the proposed local architecture is implemented. Maintain the new architecture and
+The README retains legacy cloud/hardware instructions and links the initial local
+setup. The complete target architecture is still pending. Maintain the architecture and
 milestones when implementation changes; do not erase the source plan's history.
 
 ## Current code
@@ -41,7 +43,11 @@ milestones when implementation changes; do not erase the source plan's history.
 - Pi API: aircraft lookup, registry metadata/health, and a loopback readsb/tar1090
   enrichment endpoint exist. Local `/v1/routes/{callsign}` and legacy live
   `route_resolution` are implemented, with independent reference diagnostics.
-  No canonical production `/v1/flights` yet.
+  Initial `/v1/flights` now uses a one-second-cached local file/HTTP snapshot and
+  emits partial flat telemetry. It has no route/logo join, geographic ordering,
+  producer byte bound or canonical progress/clock state machine. See
+  [prototype contract](local-flight-api.md); its `schema_version=1` is incompatible
+  with the nested M1 draft.
 - Route maintenance: `route_pipeline.py` streams selected or explicitly worldwide
   VRS tables into immutable SQLite generations, retains notices/checksums, and
   atomically activates/rolls back. `route_reference.py` handles exact/alias
@@ -54,8 +60,10 @@ milestones when implementation changes; do not erase the source plan's history.
   it does not exercise the full planned receiver/telemetry contract.
 - Standalone OpenSky CSV logger: `opensky_flight_counter.py` and its existing
   checks are preserved from `dev`; usage remains in the root README.
-- Firmware: OpenSky/AeroAPI/CDN orchestration remains the live path; configuration
-  is compiled in. BLE/NVS migration and local bitmap rendering are not implemented.
+- Firmware: the live path polls the initial Pi feed and displays nullable altitude,
+  GS and vertical rate plus connection/stale/empty messages. Cloud adapters remain
+  legacy source excluded from the build. Configuration is compiled in; canonical
+  parsing, monotonic expiry, selection by hex, BLE/NVS and local bitmaps are pending.
 - Toolchain: `espressif32` is unpinned; libraries use version ranges. Existing
   physical `esp32dev` and display-only `wokwi` environments are configured.
   The active 64×32 Wokwi diagram matches the mock environment. The previous
@@ -84,6 +92,9 @@ milestones when implementation changes; do not erase the source plan's history.
 | Receiver inventory: inspected readsb's JSON reference at revision `094720939c01943de82b14df6f42f67fff1cd514`. | Distinguishes transmitted data from decoder calculations and references; this is upstream source research, not identification of the installed Pi version. |
 | M1 static validation: three schemas valid; 40 examples match expected outcomes (28 valid, 12 intentionally invalid); seven timing examples consistent. | Offline documentation checker validates producer shape, source/route/logo relationships, control-character rejection and compact body bytes. It does not run normalizer, HTTP, firmware or application tests. |
 | M1 byte and documentation checks: maximal eight-row Unicode output is 32,627 bytes; complete three-row prefix is 13,279 bytes; largest accepted example is 15,300 bytes. 130 local links/anchors, JSON code examples, balanced fences, new-file whitespace and `git diff --check` passed. | Serialized example measurements explain byte truncation; they do not prove ESP32 parser allocation or real receiver/hardware behavior. |
+| Main-to-dev integration: all 25 Pi tests passed (three FAA, six prototype-feed, sixteen route), including the combined flight/route/health HTTP check with application WAN calls forbidden. M1 documentation checker again passed three schemas, 40 examples and seven timing cases. | Synthetic prototype behavior and legacy compatibility; the prototype is not M1-conformant. No firmware build or hardware acceptance was performed. |
+| Packaging integration: added the new feed module to the Dockerfile; started the API from exactly its copied Python modules and checked five HTTP endpoints with a local receiver file and missing FAA/route data. | Native temporary-directory startup check, not a Docker rebuild. Default Docker FAA sync still blocks offline startup until separately changed. |
+| Merge static review: 169 local Markdown links/anchors, four JSON examples, balanced fences, changed Python syntax, both wiring JSON files, Wokwi TOML and Git whitespace checks passed. | Source/documentation checks only; firmware compilation and physical display mapping remain unverified. |
 
 Docker CLI/Buildx state needed `DOCKER_CONFIG=/tmp/flightwall-docker-config` during
 onboarding because the cloud home directory was read-only. Python 3.12 and Docker
@@ -94,9 +105,10 @@ Live processes and temporary state must not be assumed to survive restoration.
 
 Review/freeze M1 draft 0.1 and continue M0's actual receiver/toolchain baseline.
 Receiver access is needed to confirm path/coordinates/export cadence and draft
-4 MiB/512-row input limits. Build M2's cached file reader, clock/progress state
-machine and byte-bounded feed using the shared schemas/examples; then implement
-the M3 bounded Pi consumer and measure its complete memory footprint. The
+4 MiB/512-row input limits. Resolve the prototype/canonical wire migration/version
+before freeze, then extend the cached reader with M2's clock/progress state machine,
+filters and byte-bounded feed using the shared schemas/examples. Migrate the M3
+Pi consumer to those envelopes and measure its complete memory footprint. The
 implemented full diagnostic route object needs the documented compact projection,
 not repeated copies inside every candidate. Render available pairs in M6.
 Google/airline-status results can check a dated sample; API/dataset
@@ -105,9 +117,9 @@ observed airport events. Read the M1 checklist before coding; keep
 existing lookup responses compatible and do not extend the simulator's separate
 schema as a substitute for the production contract.
 
-M1 is a detailed checked draft, awaiting final freeze/runtime evidence. M4 is
-partial; other full migration milestones
-remain planned, with optional observed-event work deferred in M8. Pi access,
+M1 is a detailed checked draft, awaiting final freeze/runtime evidence. M2/M3 have
+initial prototypes, M4 has its independent route slice, and all remain partial.
+Other migration milestones remain planned, with observed-event work deferred in M8. Pi access,
 actual board/wiring, pinned provisioning support, and approved data/asset artifacts
 remain integration prerequisites, not reasons to request flight API secrets.
 
@@ -115,16 +127,21 @@ Reference files prepared during validation live only under `/tmp/flightwall-vrs-
 and `/tmp/flightwall-vrs-world-validation`; they are not tracked, deployed, or
 guaranteed to survive workspace restoration. API clients should import into their
 own persistent configured state directory. The accumulated work was committed on
-`feature/m1-contract-and-offline-routes` for integration into `dev`. Consult Git
-history for current publication/merge status. No hardware deployment or firmware
+`feature/m1-contract-and-offline-routes` and merged into `dev`; main's initial
+local feed was subsequently integrated. Consult Git history for current
+publication/merge status. No hardware deployment or firmware
 flashing was performed.
 
 M1 draft artifacts live in the repository, including receiver inputs, envelope
 examples and the optional offline checker in `docs/api/`. Logo hashes are mock
 metadata with no corresponding approved images. Large-input descriptions are
-not executable replay generators. Application tests and Docker/firmware builds
-were not rerun for this documentation task; their earlier results remain prior
-evidence.
+not executable replay generators. Earlier Docker results remain prior evidence;
+the new Pi tests and native packaging check above cover this source merge.
+PlatformIO is unavailable here, so firmware builds remain unverified.
+
+The separate screen-mockup review is awaiting the branch or image path. The earlier
+branch review found the original wall photo but no identified new mockup set;
+do not claim visual contract acceptance without those images.
 
 ## Handoff maintenance
 

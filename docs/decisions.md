@@ -225,6 +225,12 @@ the body fits 16,384 bytes. An eight-row maximal Unicode example exceeds the
 budget even though its fields conform to the schema. Text abbreviations are
 flagged; identity keys are never shortened into different plausible identities.
 
+Integration note, 2026-10-04: main's initial local feed/parser was merged into dev.
+It follows [the prototype API](local-flight-api.md), with flat fields and
+Unix-second timestamps, rather than this draft. Both use `schema_version=1`;
+resolve the explicit wire migration/version before freezing M1. This integration
+does not change the canonical draft or establish M2/M3 acceptance.
+
 Consequence: schema checks provide reviewable M1 design evidence, not receiver,
 HTTP or firmware implementation. M2 proves normalization/source progress and M3
 proves memory, expiry and rendering. Same-origin 1,152-byte bitmap delivery and

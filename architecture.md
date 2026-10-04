@@ -1,9 +1,11 @@
 # FlightWall architecture and implementation plan
 
-Status: target design with an implemented Pi route slice; migration is incomplete.
+Status: target design with implemented Pi routes and an initial local feed/parser;
+canonical migration is incomplete.
 Baseline reviewed on 2026-10-03 against commit
 `500a49c67a73bb4d9ea3da131115bdaf4db84dec`; route implementation notes updated
-on the same date. M1 contract documentation updated on 2026-10-04.
+on the same date. M1 documentation and integration of main's initial local feed
+(`8418bdc974a15c813f567ef136ac1126e12e35e8`) updated on 2026-10-04.
 
 This document turns the [original implementation plan](docs/flightwall-local-plan.md)
 into the architecture to follow. Use the [milestone checklist](docs/implementation-plan.md)
@@ -39,13 +41,13 @@ with the cloud flight adapters disabled; that gate alone is not the full release
 
 | Area | Verified current behavior | Migration requirement |
 | --- | --- | --- |
-| [Pi server](pi_enrichment/server.py) | Serves registry health/meta/lookup, legacy live enrichment, and `/v1/routes/{callsign}`. Live requests still fetch loopback HTTP individually and omit telemetry/source freshness. Route reads are local, pinned, and bounded. | Add cached receiver input and the canonical `/v1/flights` endpoint using the shared route contract. |
+| [Pi server](pi_enrichment/server.py) | Serves a one-second-cached prototype `/v1/flights` from file/HTTP, registry health/meta/lookup, legacy live enrichment, and `/v1/routes/{callsign}`. Route reads are local, pinned, and bounded. | Migrate the prototype to the canonical M1 envelope, progress/clock rules, geographic selection and byte bounds; join routes into the feed. |
 | [Route maintenance](pi_enrichment/route_pipeline.py) and [resolver](pi_enrichment/route_reference.py) | Stream pinned CC0 VRS tables into validated immutable SQLite generations; indexed offline lookups, aliases, ordered airport codes, dated overrides, and rollback exist. | Measure actual traffic correctness/coverage and Pi resources; adopt route fields in the canonical feed and firmware. |
 | [FAA importer](pi_enrichment/faa_pipeline.py) | Selects MASTER from the FAA archive; imports into the active DB inside a transaction. Does not join ACFTREF. Owner can populate `operator_name`; FAA classification can populate `aircraft_type`. | Separate owner/operator/type semantics, join reference records, and stage complete dataset generations. |
 | [Docker entrypoint](pi_enrichment/docker-entrypoint.sh) | Runs registry sync before starting the API when `RUN_FAA_SYNC_ON_START=true`; this is the base Compose default. | Production startup must serve cached data immediately and run updates separately. |
 | [Simulator](flightwall_sim/simulator.py) | Its `/v1/flights` on port 8090 assembles synthetic aircraft from individual lookup requests. A failed poll retains the previous payload. | Consume the production contract and expire stale data instead of presenting old cards indefinitely. |
-| [Firmware entrypoint](firmware/src/main.cpp) and [orchestrator](firmware/core/FlightDataFetcher.cpp) | Use OpenSky → AeroAPI → local/CDN enrichment. Missing callsign or unsuccessful flight lookup suppresses an aircraft. | Replace the local production path with one Pi feed that accepts partial records. |
-| [Flight model](firmware/models/FlightInfo.h) and [renderer](firmware/adapters/NeoMatrixDisplay.cpp) | Route/type oriented model and three-line card; logo metadata produces a text badge. | Add optional telemetry, freshness, bitmap assets, and connection/receiver states. |
+| [Firmware entrypoint](firmware/src/main.cpp) and [Pi adapter](firmware/adapters/PiFlightFeed.cpp) | Poll the prototype Pi feed, retain aircraft without callsigns/references, and exclude cloud adapters from the build. | Adopt M1 parsing, source ages/progress, monotonic expiry, selection by hex and retry/backoff; prove the physical local path. |
+| [Flight model](firmware/models/FlightInfo.h) and [renderer](firmware/adapters/NeoMatrixDisplay.cpp) | Local cards include altitude, GS and vertical rate with unknown fallbacks; connection/stale/empty messages exist. Legacy mock cards use a text logo badge. | Add canonical provenance, expiry, IAS/TAS and ground-state semantics, approved bitmap assets and final pages. |
 | [PlatformIO configuration](firmware/platformio.ini) | `espressif32` is unpinned and library dependencies use version ranges. | Select and record tested toolchain versions before choosing BLE provisioning APIs. |
 | [Hardware configuration](firmware/config/HardwareConfiguration.h) and [Wokwi diagram](firmware/diagram.json) | Physical target is 160×32; mock is 64×32. Renderer uses tiled mapping in both. | Verify supported Wokwi parts and separate its pixel mapping from physical wiring. |
 | [systemd templates](pi_enrichment/systemd/flightwall-enrichment.service) | Assume user `pi`, fixed paths, and a loopback tar1090 URL. | Discover actual Pi paths/user/permissions before adapting deployment files. |
@@ -98,7 +100,11 @@ decoded aircraft messages, decoder bookkeeping and reference annotations.
 
 The full flight boundary has a versioned M1 draft schema, detailed contracts and
 synthetic examples under [docs/api](docs/api/README.md). It is not yet frozen or
-implemented. Existing endpoints and the implemented route subset are identified
+implemented in runtime. The [initial local API](docs/local-flight-api.md) already
+occupies `/v1/flights`, with flat fields, Unix-second timestamps and `ok` status.
+It shares `schema_version=1` with the incompatible M1 draft; that number alone
+does not establish conformance. Resolve the wire migration/version before M1
+freeze. Existing endpoints and the implemented route subset are identified
 below. Initial production port is **8080**, configurable separately
 on the Pi and in ESP32 settings. Port **8090** remains a development preview port.
 

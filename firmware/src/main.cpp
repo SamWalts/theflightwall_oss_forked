@@ -2,7 +2,7 @@
 Purpose: Firmware entry point for ESP32.
 Responsibilities:
 - Initialize serial, connect to Wi‑Fi, and construct fetchers and display.
-- Periodically fetch state vectors (OpenSky), enrich flights (AeroAPI), and render.
+- Fetch local readsb flights from the Pi and render.
 Configuration: UserConfiguration (location/filters/colors), TimingConfiguration (intervals),
                WiFiConfiguration (SSID/password), HardwareConfiguration (display specs).
 */
@@ -14,14 +14,11 @@ Configuration: UserConfiguration (location/filters/colors), TimingConfiguration 
 #include "config/UserConfiguration.h"
 #include "config/WiFiConfiguration.h"
 #include "config/TimingConfiguration.h"
-#include "adapters/OpenSkyFetcher.h"
-#include "adapters/AeroAPIFetcher.h"
-#include "core/FlightDataFetcher.h"
+#include "adapters/PiFlightFeed.h"
 #include "adapters/NeoMatrixDisplay.h"
 
-static OpenSkyFetcher g_openSky;
-static AeroAPIFetcher g_aeroApi;
-static FlightDataFetcher *g_fetcher = nullptr;
+static PiFlightFeed g_feed;
+static std::vector<FlightInfo> g_flights;
 static NeoMatrixDisplay g_display;
 
 static unsigned long g_lastFetchMs = 0;
@@ -212,7 +209,7 @@ void setup()
         }
     }
 
-    g_fetcher = new FlightDataFetcher(&g_openSky, &g_aeroApi);
+    // Live operation uses only the configured local Pi.
 }
 
 void loop()
@@ -229,68 +226,27 @@ void loop()
 
     const unsigned long intervalMs = TimingConfiguration::FETCH_INTERVAL_SECONDS * 1000UL;
     const unsigned long now = millis();
-    if (now - g_lastFetchMs >= intervalMs)
+    if (WiFi.status() != WL_CONNECTED)
+    {
+        g_flights.clear();
+        g_display.displayMessage("WiFi disconnected");
+        delay(10);
+        return;
+    }
+    if (g_lastFetchMs == 0 || now - g_lastFetchMs >= intervalMs)
     {
         g_lastFetchMs = now;
-
-        std::vector<StateVector> states;
-        std::vector<FlightInfo> flights;
-        size_t enriched = g_fetcher->fetchFlights(states, flights);
-
-        Serial.print("OpenSky state vectors: ");
-        Serial.println((int)states.size());
-        Serial.print("AeroAPI enriched flights: ");
-        Serial.println((int)enriched);
-
-        for (const auto &s : states)
-        {
-            Serial.print(" ");
-            Serial.print(s.callsign);
-            Serial.print(" @ ");
-            Serial.print(s.distance_km, 1);
-            Serial.print("km bearing ");
-            Serial.println(s.bearing_deg, 1);
-        }
-
-        for (const auto &f : flights)
-        {
-            Serial.println("=== FLIGHT INFO ===");
-            Serial.print("Ident: ");
-            Serial.println(f.ident);
-            Serial.print("Ident ICAO: ");
-            Serial.println(f.ident_icao);
-            Serial.print("Ident IATA: ");
-            Serial.println(f.ident_iata);
-            Serial.print("Airline: ");
-            Serial.println(f.airline_display_name_full);
-            Serial.print("Airline Logo URL: ");
-            Serial.println(f.airline_logo_url);
-            Serial.print("Aircraft: ");
-            Serial.println(f.aircraft_display_name_short.length() ? f.aircraft_display_name_short : f.aircraft_code);
-            Serial.print("Registration: ");
-            Serial.println(f.registration);
-            Serial.print("Operator Code: ");
-            Serial.println(f.operator_code);
-            Serial.print("Operator ICAO: ");
-            Serial.println(f.operator_icao);
-            Serial.print("Operator IATA: ");
-            Serial.println(f.operator_iata);
-            Serial.print("Enrichment Source: ");
-            Serial.println(f.enrichment_source);
-            Serial.print("Enrichment Updated At: ");
-            Serial.println(f.enrichment_updated_at);
-
-            Serial.println("--- Origin ---");
-            Serial.print("Code ICAO: ");
-            Serial.println(f.origin.code_icao);
-
-            Serial.println("--- Destination ---");
-            Serial.print("Code ICAO: ");
-            Serial.println(f.destination.code_icao);
-            Serial.println("===================");
-        }
-
-        g_display.displayFlights(flights);
+        g_feed.fetchFlights(g_flights);
+        Serial.print("Local Pi flights: ");
+        Serial.println((int)g_flights.size());
     }
+    if (g_feed.status() == PiFlightFeed::Status::Stale)
+        g_display.displayMessage("Receiver stale");
+    else if (g_feed.status() == PiFlightFeed::Status::Unavailable)
+        g_display.displayMessage("Pi unavailable");
+    else if (g_flights.empty())
+        g_display.displayMessage("No aircraft");
+    else
+        g_display.displayFlights(g_flights);
     delay(10);
 }

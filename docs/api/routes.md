@@ -4,7 +4,9 @@ Implemented by [route_reference.py](../../pi_enrichment/route_reference.py).
 This is the full diagnostic route contract for the existing Pi API and legacy
 live enrichment. The proposed [canonical flight feed](flights.md) uses an explicit
 compact projection with shared source IDs; it does not repeat this entire object
-inside every candidate. That feed has an M1 draft schema/examples but no M2 runtime.
+inside every candidate. That canonical feed has an M1 draft schema/examples but
+no conforming M2 runtime. The [initial flat feed](../local-flight-api.md) does not
+yet join route data.
 The simulator does not define this contract. A [producer schema](route-resolution-v1.schema.json)
 describes the existing response without adding a version field to that endpoint.
 
