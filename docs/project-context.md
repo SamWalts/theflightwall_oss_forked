@@ -28,6 +28,7 @@ import on the Pi; local landing observations are a separate optional feature.
 | [Implementation checklist](implementation-plan.md) | Milestones, dependencies, acceptance criteria, and status. |
 | [Decisions](decisions.md) | Design rationale, provisional choices, and unresolved facts. |
 | [Pi-to-ESP32 contracts](api/README.md) | M1 draft feed/asset/health/meta/legacy contracts, schemas and status map. |
+| [Screen contract review](screen-contract-review.md) | Reviewed design snapshot, M1 mismatches, merge blockers, and PlatformIO setup status. |
 | [Receiver inventory](adsb-receiver-data.md) | What aircraft radio messages, readsb calculations/bookkeeping and external annotations can provide. |
 | [Enrichment joins](api/enrichment-joins.md) | Hex-to-aircraft, callsign-to-airline/ordered-route and operator-to-approved-logo keys and failure rules. |
 | [Route lookup research](route-detection.md) | Verified free callsign-route data for overflights, Google/manual verification, API alternatives, and current-flight limits. |
@@ -98,7 +99,8 @@ milestones when implementation changes; do not erase the source plan's history.
 
 Docker CLI/Buildx state needed `DOCKER_CONFIG=/tmp/flightwall-docker-config` during
 onboarding because the cloud home directory was read-only. Python 3.12 and Docker
-Compose are available in this workspace; PlatformIO was not installed at review.
+Compose are available in this workspace. PlatformIO Core 6.2.0 is now installed
+as recorded in the screen review below; firmware compilation remains blocked.
 Live processes and temporary state must not be assumed to survive restoration.
 
 ## Next useful task
@@ -137,11 +139,23 @@ examples and the optional offline checker in `docs/api/`. Logo hashes are mock
 metadata with no corresponding approved images. Large-input descriptions are
 not executable replay generators. Earlier Docker results remain prior evidence;
 the new Pi tests and native packaging check above cover this source merge.
-PlatformIO is unavailable here, so firmware builds remain unverified.
+PlatformIO Core 6.2.0 is installed in `/workspace/.venvs/flightwall-platformio`.
+Project configuration checks passed, but ESP32 platform installation received
+HTTP 403 from the environment proxy before compilation. The saved environment
+draft needs publication and registry access verification before builds can resume.
 
-The separate screen-mockup review is awaiting the branch or image path. The earlier
-branch review found the original wall photo but no identified new mockup set;
-do not claim visual contract acceptance without those images.
+The screen branch `design/flightwall-screens` was reviewed at
+`c1b274e41c7176556ccdae090c13262b4b6472ca` against dev's main-integration commit
+`61178bb3f4a52e3e0532d806db650c86f17989e1`. Earlier gallery/export/browser checks
+passed for 34 screens, and contact sheets were inspected. The
+[review report](screen-contract-review.md) records seven M1 alignment findings,
+a README merge conflict, and the PlatformIO setup evidence. The design branch
+remains unmerged. After its updates are published, review the latest commit
+against these findings, rerun gallery/M1 checks, and resolve the conflict before
+integration. These previews do not establish runtime or physical acceptance.
+
+Publishing the review report used documentation link/fence checks and
+`git diff --check`; application tests and firmware builds were not rerun.
 
 ## Handoff maintenance
 
