@@ -14,10 +14,17 @@ This is the open source version with some basic guides to the panels, mounting t
 ![Main Image](images/main-image.png)
 *Airline logo metadata from AeroAPI is now integrated into the firmware display path.*
 
+# Beginner build documentation
+
+Start with the [step-by-step wiring guide](docs/beginner-wiring-guide.md), [complete shopping list with purchase links](docs/flightwall-shopping-list.md), and [staged build plan](docs/flightwall-build-plan.md). They cover the volt meter, tools, wire, connectors, fuses, power distribution, buffer pinout, mounting, and tests. The [standalone LED test project](docs/examples/wiring-test/README.md) lets you verify one panel, a four-panel module, and the full wall without flight-data services.
+
+The beginner design uses five factory-enclosed 5 V / 4 A supplies, independently fused panel feeds, and a 74AHCT125 buffer at brightness 5/255. Follow its diagrams and part ratings; the original single-supply sketch below describes a different arrangement. Full-brightness white across 5,120 LEDs can require hundreds of amps, so the original supply recommendation is not an unrestricted power budget.
+
 # Component List
+- The following is the **original build's** component list. The beginner guide's shopping list specifies its complete alternative power arrangement and accessories.
 - Main components
     - 20x [16x16 LED panels](https://www.aliexpress.us/item/2255800358269772.html)
-    - ESP32 dev board (we used the [R32 D1](https://www.amazon.com/HiLetgo-ESP-32-Development-Bluetooth-Arduino/dp/B07WFZCBH8) but any ESP dev board should work)
+    - Classic ESP32 dev board with GPIO25 available (we used the [R32 D1](https://www.amazon.com/HiLetgo-ESP-32-Development-Bluetooth-Arduino/dp/B07WFZCBH8))
     - 3D printed brackets (or MDF / cardboard)
     - 2x 6ft wooden trim pieces (for support)
 - Power
@@ -34,7 +41,7 @@ This is the open source version with some basic guides to the panels, mounting t
 With 20 panels (10x2) - ~63 inches x ~12.6 inches
 
 ## LED Panels
-[These are the LED panels we used](https://www.aliexpress.us/item/2255800358269772.html), but any similar LED matrix should work.
+[These are the LED panels we used](https://www.aliexpress.us/item/2255800358269772.html). Substitutes need to be 5 V WS2812B-compatible RGB matrices; check their pixel layout, power requirements, and connector pinout.
 
 We designed 3D printable brackets to attach the panels together, this is one approach, but you could also use MDF board or even cardboard (as we did originally haha)
 
@@ -46,7 +53,7 @@ Obviously this is just one way to hold them together, but we're sure there are b
 
 ## Wiring
 
-Here is a wiring diagram for how to connect the whole system together.
+This is the original build's conceptual wiring diagram. For beginner assembly, use the [detailed wiring guide](docs/beginner-wiring-guide.md), which specifies a different power distribution arrangement and buffer pinout.
 
 ![Wiring Diagram](images/wiring-diagram.png)
 
@@ -72,7 +79,7 @@ Optional local enrichment:
 
 
 ### Setting up AeroAPI
-1. Go to the [FlightAware AeroAPI]([https://flightaware.com/aeroapi](https://flightaware.com/aeroapi)) page and create a personal account
+1. Go to the [FlightAware AeroAPI](https://flightaware.com/aeroapi) page and create a personal account
 3. From the dashboard, open **API Keys**, click **Create API Key** and follow the steps
 8. Copy the generated key and add it to [APIConfiguration.h](firmware/config/APIConfiguration.h)
 
