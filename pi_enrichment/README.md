@@ -4,6 +4,98 @@ Local Raspberry Pi service that:
 - Downloads FAA registry data and imports it into SQLite.
 - Serves a local HTTP API for ADS-B ICAO (`hex`) enrichment.
 - Optionally enriches `readsb/tar1090` live `aircraft.json` output.
+- Resolves received callsigns into offline reference airport sequences using CC0
+  VRS standing data, with separately stored dated manual overrides.
+
+## Offline departure/destination lookup
+
+Route maintenance is an explicit command, separate from API startup. From the
+repository root, import a pinned VRS revision for the airlines of interest:
+
+```bash
+python3 pi_enrichment/route_pipeline.py --data-dir /tmp/flightwall-routes import \
+  --revision d856ef1ed0fc492e8a3933ff4a938448ed008f66 --airlines BAW UAL
+python3 pi_enrichment/route_pipeline.py --data-dir /tmp/flightwall-routes lookup ' BAW117 '
+python3 pi_enrichment/server.py --route-data-dir /tmp/flightwall-routes --host 127.0.0.1
+```
+
+The revision above is the researched example, not an assertion that it is the
+latest. Select a new full 40-character revision for later maintenance. Airline
+selection uses canonical VRS codes; IATA aliases apply to lookup, not import
+selection. The importer discovers both `-all.csv` and digit partitions. All
+companion airports/airlines are stored in SQLite so aliases can be checked for
+ambiguity and ordered airport codes can be resolved without runtime downloads.
+
+The default state root is `~/.flightwall-pi/routes`, configurable with
+`--data-dir` for maintenance and `--route-data-dir` for the API. Both honor
+`ROUTE_DATA_DIR`; the Docker image defaults to `/data/routes` on its persistent
+volume. The `/tmp` examples are for development, not persistent Pi deployment.
+
+```bash
+curl --fail http://127.0.0.1:8080/v1/routes/BAW117
+python3 pi_enrichment/route_pipeline.py --data-dir /tmp/flightwall-routes status
+python3 pi_enrichment/route_pipeline.py --data-dir /tmp/flightwall-routes rollback
+```
+
+Lookup/status/rollback use local files only. Rollback requires a successful
+second import and validates the previous generation before switching. Failed
+maintenance leaves the active pointer unchanged. Requests pin an immutable DB;
+old generations are retained so open readers and rollback remain safe. Automatic
+cleanup is intentionally absent: to reclaim storage, stop the API and maintenance,
+retain the `active` and `previous` IDs in `active.json`, and remove only older
+generation directories. Overrides live outside the generations.
+
+For a predownloaded checkout or GitHub tar.gz, add `--source-dir /path/to/standing-data`
+or `--archive /path/to/standing-data.tar.gz` to `import`. The caller must ensure
+these inputs are from the supplied revision; the manifest records that the
+revision is caller asserted. HTTPS imports record the pinned download URL.
+Neither path runs arbitrary repository code. To prepare all routes, explicitly
+replace `--airlines BAW UAL` with `--all-routes`; measure storage/coverage before
+using that scope on the Pi.
+
+Imports stream 64 KiB chunks and one CSV record at a time into a 1 MiB SQLite
+cache. They cap compressed archives at 512 MiB, expanded archives at 2 GiB,
+individual source files at 16 MiB, physical CSV lines at 16,384 characters, and
+CSV records at 65,536 characters. SQLite uses disk temporary storage, no mmap,
+and DELETE journaling; committed generations do not depend on WAL files. Gzip
+CRC/trailer, headers, duplicate keys, joins, license/credits, integrity, counts,
+and artifact checksums are validated before activation. License inspection is
+bounded at 64 KiB. The small JSON manifest points to per-artifact checksums in
+SQLite instead of loading an artifact list into memory.
+
+Each generation contains `routes.sqlite3`, `manifest.json`, and retained notices.
+Only `active.json` is atomically replaced. Maintenance takes an exclusive local
+lock and does not block runtime reads. Budget storage for the staging, active,
+and previous generations during an update; no worldwide CSV dictionary or archive
+index is kept in RAM. API lookups use indexed read-only connections with a 1 MiB
+cache each, and the HTTP server caps concurrency at eight request workers.
+
+### Dated manual corrections
+
+Record a Google/airline finding with the actual flight date, source, evidence and
+short validity window. This example is illustrative; use independently checked
+values rather than treating its airports as verified for that date:
+
+```bash
+python3 pi_enrichment/route_pipeline.py --data-dir /tmp/flightwall-routes override BAW117 \
+  --airports EGLL-KJFK --flight-date 2026-10-03 \
+  --valid-from 2026-10-03T10:00:00Z --valid-until 2026-10-03T23:00:00Z \
+  --source manual_airline --evidence 'Dated airline flight-status result'
+```
+
+Corrections are separate from the downloaded DB, expire, and take precedence
+when their callsign/date/window match. `--aircraft-hex` scopes evidence to one
+aircraft. Add `--verified` only after checking that particular flight; it requires
+the hex and dated evidence. Callsign/date-only overrides stay unverified. Windows
+must be at most 24 hours; the flight date is the UTC start date. Expired records
+are removed on subsequent override maintenance. Overnight evidence may require
+an explicit `flight_date` lookup parameter after midnight UTC.
+
+See the [route contract](../docs/api/routes.md) for normalization, query parameters,
+unknowns, geography checks, two-airport direction, long sequences, and verification
+semantics. VRS airport order gives a reference departure/destination pair; it
+does not confirm today's itinerary or actual landing. Aircraft without a route
+remain in the live response. Firmware display adoption follows M1/M2/M3/M6.
 
 ## Test locally with Docker
 
@@ -159,6 +251,9 @@ Unknown ICAO example:
 - `GET /health`: service health + stale flag.
 - `GET /v1/meta`: schema/version/checksum/row count sync metadata.
 - `GET /v1/aircraft/live`: reads `tar1090/data/aircraft.json` and enriches each aircraft by `hex`.
+- `GET /v1/routes/{callsign}`: local route reference/override lookup; see the
+  [route contract](../docs/api/routes.md). The live adapter includes this object
+  as `route_resolution`; health/meta include independent route diagnostics.
 
 ## FAA sync pipeline
 

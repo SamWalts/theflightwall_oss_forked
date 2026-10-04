@@ -1,0 +1,766 @@
+{
+  "complete": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "partial": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "no-callsign": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "unknown-references": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "ground-and-zero": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "zero-coordinates": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 0,
+      "center_longitude": 0,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "healthy-empty": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "filter-unconfigured": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": null,
+      "center_longitude": null,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "expired-position": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "expired-aircraft": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "multi-stop": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "long-route": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "route_geography_max_excess_km": 0,
+    "operator_result": "unresolved_synthetic_partial"
+  },
+  "ambiguous-alias": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "dated-override": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "offline-clock": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "same_host",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "initializing": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": null,
+    "clock_confidence": "trusted_utc",
+    "progress_established": false,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "source-missing": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-source": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "clock-future": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 1050,
+    "clock_confidence": "uncertain",
+    "progress_established": false,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "previous_source_timestamp": 1791064801
+  },
+  "clock-backward": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 1050,
+    "clock_confidence": "uncertain",
+    "progress_established": false,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "previous_source_timestamp": 1791064801
+  },
+  "frozen-source": {
+    "pi_wall_time": "2026-10-03T22:00:05.100Z",
+    "sample_monotonic_ms": 10000,
+    "serialize_monotonic_ms": 10050,
+    "last_source_progress_monotonic_ms": 4950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "old-snapshot": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "source-byte-limit": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "generator": {
+      "kind": "raw_json_with_large_unused_string",
+      "target_bytes": 4194305
+    }
+  },
+  "source-row-limit": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "generator": {
+      "kind": "repeat_aircraft",
+      "count": 513,
+      "template": {
+        "hex": "a1b2c3",
+        "type": "adsb_icao",
+        "flight": "BAW117  ",
+        "lat": 51.49,
+        "lon": -0.1,
+        "alt_baro": 30000,
+        "alt_geom": 30125,
+        "gs": 450,
+        "ias": 280,
+        "tas": 470,
+        "track": 295.7,
+        "baro_rate": -640,
+        "seen": 0.4,
+        "seen_pos": 0.6,
+        "messages": 100,
+        "rssi": -20
+      }
+    }
+  },
+  "invalid-body-byte-limit": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "generator": {
+      "kind": "bounded_maximum_unicode_candidates",
+      "count": 8
+    }
+  },
+  "byte-budget-prefix": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "generator": {
+      "kind": "bounded_maximum_unicode_candidates",
+      "count": 8
+    }
+  },
+  "candidate-cap": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    },
+    "generator": {
+      "kind": "sorted_eligible_candidates",
+      "count": 9
+    }
+  },
+  "invalid-version": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-address": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-required-envelope": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-speed-type": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-reference-verification": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-route-leg": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-returned-count": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-source-id": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-logo-hash-path": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-logo-operator": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  },
+  "invalid-control-character": {
+    "pi_wall_time": "2026-10-03T22:00:00.100Z",
+    "sample_monotonic_ms": 1000,
+    "serialize_monotonic_ms": 1050,
+    "last_source_progress_monotonic_ms": 950,
+    "clock_confidence": "trusted_utc",
+    "progress_established": true,
+    "filter": {
+      "center_latitude": 51.5,
+      "center_longitude": -0.12,
+      "radius_km": 50,
+      "view_bearing_deg": null,
+      "view_sector_deg": null,
+      "min_altitude_baro_ft": null,
+      "max_altitude_baro_ft": null,
+      "require_known_altitude": false,
+      "include_ground": true
+    }
+  }
+}

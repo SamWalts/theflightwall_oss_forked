@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "instance_id": "00000000000000000000000000000001",
+  "sequence": 2,
+  "generated_at": null,
+  "receiver": {
+    "status": "initializing",
+    "reason": "clock_recovery",
+    "source": "readsb_file",
+    "source_timestamp": 1791064700,
+    "snapshot_at": null,
+    "snapshot_age_ms": null,
+    "progress_age_ms": 0,
+    "clock_confidence": "uncertain",
+    "last_success_at": null,
+    "last_success_age_ms": 50
+  },
+  "selection": {
+    "status": "ready",
+    "eligible_count": 0,
+    "returned_count": 0,
+    "truncated": false,
+    "truncation_reason": null
+  },
+  "reference_sources": [],
+  "flights": [],
+  "diagnostics": {
+    "invalid_address_count": 0,
+    "expired_message_count": 0,
+    "expired_position_count": 0,
+    "missing_position_count": 0,
+    "filtered_count": 0,
+    "input_aircraft_count": 0,
+    "invalid_metric_count": 0,
+    "reference_error_count": 0
+  }
+}

@@ -2,6 +2,21 @@
 
 TheFlightWall is an LED wall which shows live information of flights going by your window.
 
+The planned migration to a local readsb → Pi → ESP32 system is documented in
+[architecture.md](architecture.md). Follow the [implementation checklist](docs/implementation-plan.md)
+and [development guide](CONTRIBUTING.md); AI contributors should start with
+[AGENTS.md](AGENTS.md) and [project context](docs/project-context.md). The software
+setup below describes the current cloud-based firmware, not the completed migration.
+See [route lookup research](docs/route-detection.md) for free callsign-to-airport
+reference data suitable for overhead flights and Google/manual verification.
+The Pi now implements [offline route import and lookup](pi_enrichment/README.md#offline-departuredestination-lookup)
+with streamed SQLite storage; its [route contract](docs/api/routes.md) distinguishes
+reference routes from dated flight verification.
+The [M1 contract draft](docs/api/README.md) now documents the Pi-to-ESP32 feed,
+logo assets and diagnostics. See the [ADS-B receiver inventory](docs/adsb-receiver-data.md)
+and [enrichment joins](docs/api/enrichment-joins.md) for how telemetry becomes
+aircraft details, airline logos and likely departure/destination pairs.
+
 This is the open source version with some basic guides to the panels, mounting them together, data services, and code. Check out our viral build video: [https://www.instagram.com/p/DLIbAtbJxPl](https://www.instagram.com/p/DLIbAtbJxPl)
 
 **Don't feel like building one? Check out the offical product: [theflightwall.com](https://theflightwall.com)**

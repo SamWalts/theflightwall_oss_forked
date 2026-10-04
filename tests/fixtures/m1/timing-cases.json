@@ -1,0 +1,124 @@
+{
+  "note": "Documentation arithmetic cases for the proposed ESP32 consumer. They do not execute firmware or prove parser/renderer behavior.",
+  "cases": [
+    {
+      "name": "fresh",
+      "request_tick_ms": 1000,
+      "use_tick_ms": 1200,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 700
+      },
+      "boot_changed": false,
+      "previous_snapshot_deadline_tick_ms": null,
+      "override_remaining_ms": null,
+      "expected_elapsed_ms": 200,
+      "expected_live": true,
+      "expected_override_active": false
+    },
+    {
+      "name": "slow-response",
+      "request_tick_ms": 1000,
+      "use_tick_ms": 5901,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 700
+      },
+      "boot_changed": false,
+      "previous_snapshot_deadline_tick_ms": null,
+      "override_remaining_ms": null,
+      "expected_elapsed_ms": 4901,
+      "expected_live": false,
+      "expected_override_active": false
+    },
+    {
+      "name": "position-expiry",
+      "request_tick_ms": 1000,
+      "use_tick_ms": 1101,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 14900
+      },
+      "boot_changed": false,
+      "previous_snapshot_deadline_tick_ms": null,
+      "override_remaining_ms": null,
+      "expected_elapsed_ms": 101,
+      "expected_live": false,
+      "expected_override_active": false
+    },
+    {
+      "name": "tick-wrap",
+      "request_tick_ms": 4294967200,
+      "use_tick_ms": 104,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 700
+      },
+      "boot_changed": false,
+      "previous_snapshot_deadline_tick_ms": null,
+      "override_remaining_ms": null,
+      "expected_elapsed_ms": 200,
+      "expected_live": true,
+      "expected_override_active": false
+    },
+    {
+      "name": "reboot",
+      "request_tick_ms": 1000,
+      "use_tick_ms": 1200,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 700
+      },
+      "boot_changed": true,
+      "previous_snapshot_deadline_tick_ms": null,
+      "override_remaining_ms": null,
+      "expected_elapsed_ms": 200,
+      "expected_live": false,
+      "expected_override_active": false
+    },
+    {
+      "name": "same-sequence-replay",
+      "request_tick_ms": 4000,
+      "use_tick_ms": 5000,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 700
+      },
+      "boot_changed": false,
+      "previous_snapshot_deadline_tick_ms": 4900,
+      "override_remaining_ms": null,
+      "expected_elapsed_ms": 1000,
+      "expected_live": false,
+      "expected_override_active": false
+    },
+    {
+      "name": "override-expires",
+      "request_tick_ms": 1000,
+      "use_tick_ms": 4000,
+      "ages_ms": {
+        "snapshot": 100,
+        "progress": 100,
+        "message": 500,
+        "position": 700
+      },
+      "boot_changed": false,
+      "previous_snapshot_deadline_tick_ms": null,
+      "override_remaining_ms": 2000,
+      "expected_elapsed_ms": 3000,
+      "expected_live": true,
+      "expected_override_active": false
+    }
+  ]
+}

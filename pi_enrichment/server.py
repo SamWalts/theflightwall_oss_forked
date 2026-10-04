@@ -2,19 +2,57 @@
 import argparse
 import json
 import logging
+import math
 import os
 import re
 import sqlite3
+import threading
 import urllib.error
 import urllib.request
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Dict, List
+from urllib.parse import parse_qs, unquote, urlsplit
+
+from route_reference import RouteStore, RouteSession, HEX_RE
 
 DEFAULT_DATA_DIR = Path.home() / ".flightwall-pi"
 DEFAULT_DB_PATH = DEFAULT_DATA_DIR / "faa_registry.sqlite3"
 DEFAULT_TAR1090_URL = "http://127.0.0.1/tar1090/data/aircraft.json"
+DEFAULT_ROUTE_DATA_DIR = DEFAULT_DATA_DIR / "routes"
+MAX_LIVE_BYTES = 4 * 1024 * 1024
+MAX_LIVE_AIRCRAFT = 512
+
+
+class BoundedHTTPServer(ThreadingHTTPServer):
+    """Bound request workers and thus the sum of SQLite caches and response heaps."""
+    daemon_threads = True
+
+    def __init__(self, address, handler, max_workers=8):
+        self._workers = threading.BoundedSemaphore(max_workers)
+        super().__init__(address, handler)
+
+    def process_request(self, request, client_address):
+        if not self._workers.acquire(blocking=False):
+            try:
+                request.settimeout(0.25)
+                request.sendall(b"HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+            finally:
+                self.shutdown_request(request)
+            return
+        try:
+            request.settimeout(10)
+            super().process_request(request, client_address)
+        except Exception:
+            self._workers.release()
+            raise
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._workers.release()
 
 
 def utc_now_iso() -> str:
@@ -127,6 +165,8 @@ class EnrichmentStore:
 
 class EnrichmentRequestHandler(BaseHTTPRequestHandler):
     store: EnrichmentStore = None
+    route_store: RouteStore = None
+    route_max_excess_km: float = 2000
     tar1090_url: str = DEFAULT_TAR1090_URL
     stale_after_hours: int = 72
 
@@ -146,6 +186,8 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
             return self._handle_meta()
         if path == "/v1/aircraft/live":
             return self._handle_live()
+        if path.startswith("/v1/routes/"):
+            return self._handle_route_lookup(unquote(path[len("/v1/routes/"):]))
         if path.startswith("/v1/aircraft/"):
             adsb_icao = path[len("/v1/aircraft/"):]
             return self._handle_aircraft_lookup(adsb_icao)
@@ -164,6 +206,7 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
                 "last_sync_at": meta.get("last_sync_at", ""),
                 "stale": stale,
                 "updated_at": utc_now_iso(),
+                "route_reference": self.route_store.metadata() if self.route_store else {"status": "missing"},
             }
         )
 
@@ -178,18 +221,54 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
                 "last_sync_at": meta.get("last_sync_at", ""),
                 "db_path": meta.get("db_path", ""),
                 "updated_at": utc_now_iso(),
+                "route_reference": self.route_store.metadata() if self.route_store else {"status": "missing"},
             }
         )
 
     def _handle_aircraft_lookup(self, adsb_icao: str):
         self._write_json(self.store.get_aircraft(adsb_icao))
 
+    def _handle_route_lookup(self, callsign: str):
+        try:
+            query = parse_qs(urlsplit(self.path).query, keep_blank_values=True, strict_parsing=True, max_num_fields=6)
+            if any(len(values) != 1 for values in query.values()) or set(query) - {"hex", "flight_date", "lat", "lon"}:
+                raise ValueError("Unsupported or repeated route query parameter")
+            aircraft_hex = query.get("hex", [None])[0]
+            if aircraft_hex is not None:
+                aircraft_hex = aircraft_hex.upper()
+                if not HEX_RE.fullmatch(aircraft_hex):
+                    raise ValueError("hex must have six hexadecimal characters")
+            flight_date = query.get("flight_date", [None])[0]
+            if flight_date is not None:
+                if date.fromisoformat(flight_date).isoformat() != flight_date:
+                    raise ValueError("flight_date must use YYYY-MM-DD")
+            position = None
+            if "lat" in query or "lon" in query:
+                if not {"lat", "lon"} <= query.keys():
+                    raise ValueError("Supply both lat and lon")
+                position = (float(query["lat"][0]), float(query["lon"][0]))
+                if not all(math.isfinite(x) for x in position) or not -90 <= position[0] <= 90 or not -180 <= position[1] <= 180:
+                    raise ValueError("Invalid route lookup position")
+            if len(callsign) > 16:
+                raise ValueError("Callsign exceeds 16 characters")
+            result = self.route_store.resolve(callsign, aircraft_hex=aircraft_hex, flight_date=flight_date,
+                                              position=position, max_excess_km=self.route_max_excess_km) if self.route_store else RouteSession().resolve(callsign)
+            self._write_json(result)
+        except ValueError as err:
+            self._write_json({"error": "invalid_route_query", "message": str(err)}, status=400)
+
     def _fetch_live_aircraft(self) -> List[Dict]:
         with urllib.request.urlopen(self.tar1090_url, timeout=10) as response:
-            payload = json.loads(response.read().decode("utf-8"))
+            body = response.read(MAX_LIVE_BYTES + 1)
+            if len(body) > MAX_LIVE_BYTES:
+                raise ValueError("Legacy receiver snapshot exceeds 4 MiB budget")
+            payload = json.loads(body.decode("utf-8"))
+        self._live_snapshot_at = payload.get("now") if isinstance(payload, dict) else None
         aircraft = payload.get("aircraft", []) if isinstance(payload, dict) else []
         if not isinstance(aircraft, list):
             return []
+        if len(aircraft) > MAX_LIVE_AIRCRAFT:
+            raise ValueError("Legacy receiver snapshot exceeds 512-aircraft budget")
         return [a for a in aircraft if isinstance(a, dict)]
 
     def _handle_live(self):
@@ -210,7 +289,18 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
         icaos = [str(item.get("hex", "")) for item in live if item.get("hex")]
         enrichment_map = self.store.get_aircraft_map(icaos)
 
+        # One pinned read-only SQLite connection per request, never a whole-table cache.
+        if self.route_store:
+            with self.route_store.session() as routes:
+                return self._write_live(live, enrichment_map, routes)
+        return self._write_live(live, enrichment_map, RouteSession())
+
+    def _write_live(self, live, enrichment_map, routes):
         out = []
+        snapshot_at = getattr(self, "_live_snapshot_at", None)
+        snapshot_age = None
+        if isinstance(snapshot_at, (int, float)) and not isinstance(snapshot_at, bool) and math.isfinite(snapshot_at):
+            snapshot_age = datetime.now(timezone.utc).timestamp() - snapshot_at
         for item in live:
             hex_value = normalize_adsb_icao(str(item.get("hex", "")))
             enrichment = enrichment_map.get(
@@ -227,6 +317,18 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
                     "found": False,
                 },
             )
+            received = item.get("flight")
+            position = None
+            seen_pos = item.get("seen_pos")
+            if (snapshot_age is not None and 0 <= snapshot_age <= 5
+                    and isinstance(seen_pos, (int, float)) and not isinstance(seen_pos, bool) and 0 <= seen_pos <= 15 - snapshot_age
+                    and isinstance(item.get("lat"), (int, float)) and isinstance(item.get("lon"), (int, float))):
+                position = item["lat"], item["lon"]
+            try:
+                route = routes.resolve(received, aircraft_hex=hex_value, position=position,
+                                       max_excess_km=self.route_max_excess_km)
+            except (sqlite3.Error, ValueError):
+                route = RouteSession(status="invalid").resolve(received)
             out.append(
                 {
                     "adsb_icao": enrichment["adsb_icao"],
@@ -241,6 +343,7 @@ class EnrichmentRequestHandler(BaseHTTPRequestHandler):
                     "source": enrichment["source"],
                     "updated_at": enrichment["updated_at"],
                     "found": enrichment["found"],
+                    "route_resolution": route,
                 }
             )
 
@@ -265,6 +368,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--db-path", type=Path, default=Path(os.getenv("FAA_DB_PATH", str(DEFAULT_DB_PATH))))
     parser.add_argument("--tar1090-url", default=os.getenv("TAR1090_AIRCRAFT_URL", DEFAULT_TAR1090_URL))
     parser.add_argument("--stale-after-hours", type=int, default=int(os.getenv("STALE_AFTER_HOURS", "72")))
+    parser.add_argument("--route-data-dir", type=Path, default=Path(os.getenv("ROUTE_DATA_DIR", str(DEFAULT_ROUTE_DATA_DIR))))
+    parser.add_argument("--route-max-excess-km", type=float, default=float(os.getenv("ROUTE_MAX_EXCESS_KM", "2000")),
+                        help="Conservative route geography rejection budget; 0 disables checking")
     parser.add_argument("--log-level", default=os.getenv("LOG_LEVEL", "INFO"))
     return parser.parse_args()
 
@@ -274,10 +380,14 @@ def main() -> int:
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO), format="%(asctime)s %(levelname)s %(message)s")
 
     EnrichmentRequestHandler.store = EnrichmentStore(args.db_path)
+    if not 0 <= args.route_max_excess_km <= 40000:
+        raise ValueError("route-max-excess-km must be in 0–40000")
+    EnrichmentRequestHandler.route_store = RouteStore(args.route_data_dir)
+    EnrichmentRequestHandler.route_max_excess_km = args.route_max_excess_km or None
     EnrichmentRequestHandler.tar1090_url = args.tar1090_url
     EnrichmentRequestHandler.stale_after_hours = args.stale_after_hours
 
-    server = ThreadingHTTPServer((args.host, args.port), EnrichmentRequestHandler)
+    server = BoundedHTTPServer((args.host, args.port), EnrichmentRequestHandler)
     logging.info("Serving FlightWall enrichment API at http://%s:%d", args.host, args.port)
     server.serve_forever()
     return 0
