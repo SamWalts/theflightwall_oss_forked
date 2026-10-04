@@ -1,8 +1,8 @@
 # Checking the M1 contract draft
 
-Draft 0.1, 2026-10-04. These are offline documentation checks. They establish
+Flight draft 0.2 (route/logo drafts remain 0.1), 2026-10-04. These are offline documentation checks. They establish
 that the proposed schemas/examples agree; they do not establish implementation
-of `/v1/flights`, the receiver state machine, or an ESP32 consumer.
+of `/v2/flights`, the receiver state machine, or an ESP32 consumer.
 
 ## 1. Reproducible commands
 

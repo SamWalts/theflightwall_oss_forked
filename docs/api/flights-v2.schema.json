@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:flightwall:schema:flights:1",
-  "title": "FlightWall Pi-to-ESP32 flight feed v1 — M1 draft 0.1",
-  "description": "Draft producer schema. No production /v1/flights endpoint or ESP32 parser is implemented by this document. UTF-8 size, cross-field joins, source IDs and time semantics also require the human contract.",
+  "$id": "urn:flightwall:schema:flights:2",
+  "title": "FlightWall Pi-to-ESP32 flight feed v2 \u2014 M1 draft 0.2",
+  "description": "Draft producer schema. No production /v2/flights endpoint or ESP32 parser is implemented by this document. UTF-8 size, cross-field joins, source IDs and time semantics also require the human contract.",
   "type": "object",
   "properties": {
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "instance_id": {
       "type": "string",

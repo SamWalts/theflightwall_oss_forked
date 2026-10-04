@@ -1,0 +1,289 @@
+{
+  "purpose": "Synthetic design-review examples; this is not the production flight API contract.",
+  "flights": {
+    "delta": {
+      "hex": "A4B5C6",
+      "callsign": "DAL456",
+      "operator_icao": "DAL",
+      "airline_short": "DELTA AIR LINES",
+      "aircraft_type": "A321",
+      "registration": "N456DL",
+      "altitude_baro_ft": 35000,
+      "ground_speed_kt": 452,
+      "vertical_rate_baro_fpm": 1200,
+      "indicated_airspeed_kt": 280,
+      "true_airspeed_kt": null,
+      "origin": {
+        "icao": "KATL",
+        "city": "ATLANTA",
+        "source": "reference"
+      },
+      "destination": {
+        "icao": "KJFK",
+        "city": "NEW YORK",
+        "source": "reference"
+      }
+    },
+    "united": {
+      "hex": "A1B2C3",
+      "callsign": "UAL123",
+      "operator_icao": "UAL",
+      "airline_short": "UNITED AIRLINES",
+      "aircraft_type": "B789",
+      "registration": "N123UA",
+      "altitude_baro_ft": 38000,
+      "ground_speed_kt": 488,
+      "vertical_rate_baro_fpm": 0,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": 470,
+      "origin": {
+        "icao": "KSFO",
+        "city": "SAN FRANCISCO",
+        "source": "reference"
+      },
+      "destination": {
+        "icao": "EGLL",
+        "city": "LONDON",
+        "source": "reference"
+      }
+    },
+    "southwest": {
+      "hex": "A7B8C9",
+      "callsign": "SWA789",
+      "operator_icao": "SWA",
+      "airline_short": "SOUTHWEST",
+      "aircraft_type": "B738",
+      "registration": "N789WN",
+      "altitude_baro_ft": 18000,
+      "ground_speed_kt": 326,
+      "vertical_rate_baro_fpm": -1500,
+      "indicated_airspeed_kt": 235,
+      "true_airspeed_kt": null,
+      "origin": {
+        "icao": "KOAK",
+        "city": "OAKLAND",
+        "source": "reference"
+      },
+      "destination": {
+        "icao": "KLAX",
+        "city": "LOS ANGELES",
+        "source": "reference"
+      }
+    },
+    "partial": {
+      "hex": "AABBCC",
+      "callsign": "XYZ42",
+      "operator_icao": "XYZ",
+      "airline_short": null,
+      "aircraft_type": null,
+      "registration": null,
+      "altitude_baro_ft": null,
+      "ground_speed_kt": 210,
+      "vertical_rate_baro_fpm": null,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "origin": null,
+      "destination": null
+    },
+    "anonymous": {
+      "hex": "ABC123",
+      "callsign": null,
+      "operator_icao": null,
+      "airline_short": null,
+      "aircraft_type": "C172",
+      "registration": null,
+      "altitude_baro_ft": 2500,
+      "ground_speed_kt": 0,
+      "vertical_rate_baro_fpm": 0,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "origin": null,
+      "destination": null
+    },
+    "ground": {
+      "hex": "AD0001",
+      "callsign": "DAL456",
+      "operator_icao": "DAL",
+      "airline_short": "DELTA AIR LINES",
+      "aircraft_type": "A321",
+      "registration": "N456DL",
+      "altitude_baro_ft": "ground",
+      "ground_speed_kt": 0,
+      "vertical_rate_baro_fpm": 0,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "origin": null,
+      "destination": null
+    },
+    "no_route": {
+      "hex": "A4B5C6",
+      "callsign": "DAL456",
+      "operator_icao": "DAL",
+      "airline_short": "DELTA AIR LINES",
+      "aircraft_type": "A321",
+      "registration": "N456DL",
+      "altitude_baro_ft": 35000,
+      "ground_speed_kt": 452,
+      "vertical_rate_baro_fpm": null,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "origin": null,
+      "destination": null
+    },
+    "private_piston": {
+      "hex": "AB12CD",
+      "callsign": null,
+      "operator_icao": null,
+      "airline_short": null,
+      "aircraft_type": "C172",
+      "aircraft_model": "CESSNA 172",
+      "registration": "N123AB",
+      "altitude_baro_ft": 4500,
+      "ground_speed_kt": 112,
+      "vertical_rate_baro_fpm": 700,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "distance_km": 1.8,
+      "ground_track_deg": 90,
+      "origin": null,
+      "destination": null
+    },
+    "private_jet": {
+      "hex": "AC34EF",
+      "callsign": null,
+      "operator_icao": null,
+      "airline_short": null,
+      "aircraft_type": "C25B",
+      "aircraft_model": "CITATION CJ3",
+      "registration": "N456CJ",
+      "altitude_baro_ft": 31000,
+      "ground_speed_kt": 410,
+      "vertical_rate_baro_fpm": 0,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "distance_km": 3.6,
+      "ground_track_deg": 270,
+      "origin": null,
+      "destination": null
+    },
+    "unidentified_overhead": {
+      "hex": "AD56EF",
+      "callsign": null,
+      "operator_icao": null,
+      "airline_short": null,
+      "aircraft_type": null,
+      "aircraft_model": null,
+      "registration": null,
+      "altitude_baro_ft": 7200,
+      "ground_speed_kt": 125,
+      "vertical_rate_baro_fpm": null,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "distance_km": null,
+      "ground_track_deg": null,
+      "origin": null,
+      "destination": null
+    },
+    "destination_only": {
+      "hex": "A1B2C3",
+      "callsign": "UAL123",
+      "operator_icao": "UAL",
+      "airline_short": "UNITED AIRLINES",
+      "aircraft_type": "B789",
+      "registration": "N123UA",
+      "altitude_baro_ft": 38000,
+      "ground_speed_kt": 488,
+      "vertical_rate_baro_fpm": 0,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": 470,
+      "origin": null,
+      "destination": {
+        "icao": "EGLL",
+        "city": "LONDON",
+        "source": "manual"
+      }
+    },
+    "inferred_route": {
+      "hex": "A4B5C6",
+      "callsign": "DAL456",
+      "operator_icao": "DAL",
+      "airline_short": "DELTA AIR LINES",
+      "aircraft_type": "A321",
+      "registration": "N456DL",
+      "altitude_baro_ft": 35000,
+      "ground_speed_kt": 452,
+      "vertical_rate_baro_fpm": null,
+      "indicated_airspeed_kt": null,
+      "true_airspeed_kt": null,
+      "origin": {
+        "icao": "KATL",
+        "city": "ATLANTA",
+        "source": "inferred"
+      },
+      "destination": null
+    }
+  },
+  "states": {
+    "boot": {
+      "title": "STARTING",
+      "lines": [
+        "FLIGHT WALL",
+        "STARTING",
+        "PLEASE WAIT"
+      ],
+      "icon": "plane",
+      "accent": "cyan"
+    },
+    "setup": {
+      "title": "SETUP",
+      "lines": [
+        "SETUP VIA BLE",
+        "CONNECT TO WALL",
+        "SET WIFI + PI"
+      ],
+      "icon": "bluetooth",
+      "accent": "cyan"
+    },
+    "wifi": {
+      "title": "WIFI LOST",
+      "lines": [
+        "WIFI LOST",
+        "RECONNECTING",
+        "CHECK ROUTER"
+      ],
+      "icon": "wifi",
+      "accent": "amber"
+    },
+    "pi": {
+      "title": "PI UNAVAILABLE",
+      "lines": [
+        "PI UNAVAILABLE",
+        "WIFI CONNECTED",
+        "CHECK PI + PORT"
+      ],
+      "icon": "server",
+      "accent": "amber"
+    },
+    "receiver": {
+      "title": "RECEIVER STALE",
+      "lines": [
+        "RECEIVER STALE",
+        "CHECK READSB",
+        "NO LIVE DATA"
+      ],
+      "icon": "warning",
+      "accent": "amber"
+    },
+    "empty": {
+      "title": "NO AIRCRAFT",
+      "lines": [
+        "NO AIRCRAFT",
+        "IN YOUR AREA",
+        "RECEIVER OK"
+      ],
+      "icon": "radar",
+      "accent": "cyan"
+    }
+  },
+  "design_fixture_version": 1
+}

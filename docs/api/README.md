@@ -1,9 +1,10 @@
 # Pi-to-ESP32 contracts
 
-M1 draft **0.1**, updated 2026-10-04. The canonical flight feed and logo service
+M1 draft **0.2**, updated 2026-10-04. The canonical flight feed and logo service
 are proposed contracts. The diagnostic route API is implemented. An initial
 local flight feed/parser exists, but follows [the prototype contract](../local-flight-api.md)
-rather than M1; both currently use `schema_version=1` with incompatible shapes.
+rather than M1. The prototype retains `/v1/flights` and `schema_version=1`;
+the canonical draft reserves `/v2/flights` and `schema_version=2`.
 Use this document as the entry point; field semantics live in the linked contracts
 and machine-readable schemas. M2/M3/M6 must implement those definitions rather
 than introducing a second simulator or firmware schema.
@@ -13,7 +14,8 @@ than introducing a second simulator or firmware schema.
 | Contract | Direction / consumer | Status | Detailed definition |
 | --- | --- | --- | --- |
 | Decoder snapshot | Existing readsb → Pi normalizer | Cached prototype file/HTTP reader exists; canonical progress/clock rules remain M2 | [Received-data inventory](../adsb-receiver-data.md), [flight normalization](flights.md) |
-| `GET /v1/flights` | Pi → ESP32 and development preview | Prototype endpoint/parser implemented; canonical M1 shape pending | [Flight feed](flights.md), [producer schema](flights-v1.schema.json), [prototype](../local-flight-api.md) |
+| `GET /v1/flights` | Pi → current ESP32 | Implemented flat prototype, preserved during migration | [Prototype](../local-flight-api.md) |
+| `GET /v2/flights` | Pi → ESP32 and development preview | Canonical M1 shape pending | [Flight feed](flights.md), [producer schema](flights-v2.schema.json), [prototype](../local-flight-api.md) |
 | `GET /assets/logos/{sha256}.rgb565` | Pi → ESP32 asset cache | Draft v1; approved assets/server/cache remain M6 | [Logo bytes and descriptor](logos.md), [descriptor schema](logo-v1.schema.json) |
 | `GET /health` | Pi → local diagnostics | Legacy fields and prototype `receiver_status` implemented; canonical additions drafted | [Health and metadata](health-and-metadata.md) |
 | `GET /v1/meta` | Pi → local diagnostics/maintenance | Existing FAA/route summaries implemented; general manifest additions drafted | [Health and metadata](health-and-metadata.md) |
@@ -36,7 +38,7 @@ flowchart LR
     Routes[Callsign-keyed ordered routes] --> Join
     Overrides[Dated local evidence] --> Join
     Logos[Approved operator-to-asset manifest] --> Join
-    Join --> Feed[Bounded /v1/flights envelope]
+    Join --> Feed[Bounded /v2/flights envelope]
     Feed --> ESP[ESP32: validate and expire]
     ESP --> Select[Selected hex and dwell]
     Select --> Render[Telemetry, reference route and logo/badge]
@@ -52,7 +54,7 @@ explains which keys identify an aircraft, airline, route and asset.
 
 ## 3. Version and transport rules
 
-- `schema_version=1` identifies the flight-feed major version. It is unrelated to
+- `schema_version=2` identifies the canonical flight-feed major version. It is unrelated to
   ADS-B `version`, VRS schema 1, the legacy metadata version or ESP32 settings version.
 - Draft revision 0.1 is documentation status, not a production capability claim.
   The prototype's version number does not imply M1 conformance. Resolve the
@@ -77,7 +79,7 @@ explains which keys identify an aircraft, airline, route and asset.
   Those use HTTP 200 plus receiver state, with no normal flight cards.
   HTTP 4xx/5xx indicates a request/server/transport failure, not an empty sky.
 - The live envelope includes source state needed by the wall. It must not fetch
-  `/health` on every poll to decide whether `/v1/flights` is usable.
+  `/health` on every poll to decide whether `/v2/flights` is usable.
 
 BLE provisioning is a local client→ESP32 contract for M5, not a Pi→ESP32 HTTP
 endpoint. Wi-Fi passwords, pairing secrets and deployment paths do not belong in

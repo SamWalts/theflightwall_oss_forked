@@ -19,7 +19,7 @@ FIXTURES = ROOT / "tests" / "fixtures" / "m1"
 BODY_LIMIT = 16384
 TICK_MODULUS = 1 << 32
 SCHEMAS = {
-    "flights": "flights-v1.schema.json",
+    "flights": "flights-v2.schema.json",
     "routes": "route-resolution-v1.schema.json",
     "logo": "logo-v1.schema.json",
 }

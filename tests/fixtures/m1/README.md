@@ -10,7 +10,7 @@ traffic, application regression results, or a working receiver replay harness.
 | --- | --- |
 | `cases.json` | Index of examples, contract kind, expected validity and failure layer. |
 | `receiver/` | Small synthetic readsb inputs associated with the examples. A missing file is not an implicit fresh/healthy input. |
-| `envelopes/` | Proposed normalized `/v1/flights` output, including intentionally invalid producer output. |
+| `envelopes/` | Proposed normalized `/v2/flights` output, including intentionally invalid producer output. |
 | `contexts.json` | Per-flight-case Pi wall/monotonic clocks, established-progress state, filter settings and optional generator descriptions. |
 | `reference-inputs.json` | Illustrative small join tables, route sequences, mock descriptor and dated evidence; not a complete importable SQL generation. |
 | `routes/diagnostic-reference.json` | Existing diagnostic route response shape, distinct from the compact feed projection. |

@@ -2,9 +2,9 @@
 
 This documents the implemented prototype merged from main into dev. The maintained
 [M1 contract draft](api/README.md) proposes a different nested envelope, clock/
-progress rules and bounded selection. Both currently use `schema_version=1`;
-the prototype does not conform to the M1 schema. Resolve that migration/version
-before freezing M1 or switching a consumer to its fixtures.
+progress rules and bounded selection at `/v2/flights`, with `schema_version=2`.
+The existing `/v1/flights` shape and consumer remain unchanged. Canonical M2/M3
+migration must explicitly select v2 after implementation; see [D013](decisions.md#d013--separate-prototype-and-canonical-flight-versions).
 
 The Pi service serves `GET /v1/flights` on its existing port (8080 by default).
 All timestamps are Unix seconds in UTC, including fractional seconds. The

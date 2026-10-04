@@ -134,3 +134,18 @@ the milestone checklist with evidence-backed status, and
 hardware checks explicitly rather than treating fixture/build success as release
 acceptance. Apply deployment or flash commands only for an explicitly requested
 task with the necessary access.
+
+## Screen contract and gallery checks
+
+The screen view projection uses the shared canonical v2 fixtures. Run:
+
+```bash
+python3 -B -m unittest discover -s docs/screens -p 'test_*.py' -v
+python3 -B docs/screens/render_mockups.py --check
+python3 -B docs/screens/verify_review.py
+```
+
+Rendering needs Pillow. Browser verification needs Playwright and Chromium.
+Use `python3 docs/screens/render_mockups.py` to regenerate all exported assets
+after changing render logic/fixtures. These checks prove design behavior, not
+physical LED mapping, canonical API implementation, or approved logo rights.

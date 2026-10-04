@@ -1,18 +1,17 @@
 # Flight feed: Pi → ESP32
 
-M1 draft **0.1**, 2026-10-03. Proposed `GET /v1/flights`, schema version 1.
-The server and ESP32 implement [an initial prototype](../local-flight-api.md) at
-this path, with a flat envelope, Unix-second timestamps and `ok` receiver status.
-They do not implement this canonical M1 shape. Both currently use
-`schema_version=1`; consumers must validate the envelope, and the wire
-migration/version must be resolved before M1 freeze.
-The [producer schema](flights-v1.schema.json) and
+M1 draft **0.2**, 2026-10-04. Proposed `GET /v2/flights`, schema version 2.
+The server and ESP32 retain [the initial prototype](../local-flight-api.md) at
+`/v1/flights` with schema version 1. The canonical endpoint remains unimplemented.
+Consumers must request their supported major version and validate its envelope;
+no endpoint silently changes shape. See [D013](../decisions.md#d013--separate-prototype-and-canonical-flight-versions).
+The [producer schema](flights-v2.schema.json) and
 [synthetic fixtures](../../tests/fixtures/m1/README.md) define this draft together.
 The human rules below cover relationships JSON Schema cannot express.
 
 ## 1. Request, response and purpose
 
-The ESP32 requests `/v1/flights` from its configured Pi, normally every 1–2 s.
+The ESP32 requests `/v2/flights` from its configured Pi, normally every 1–2 s.
 There are no flight-selection, coordinates, download-URL or airline query
 parameters in this first production contract. The Pi's validated configuration
 owns filtering. Selection/dwell belongs to the ESP32.
@@ -35,7 +34,7 @@ value, not an empty string, zero or omitted field.
 
 | Path | Type / bound | Meaning |
 | --- | --- | --- |
-| `schema_version` | Integer, exactly 1 | Feed major version. Reject unsupported versions before interpreting candidates. |
+| `schema_version` | Integer, exactly 2 | Feed major version. Reject unsupported versions before interpreting candidates. |
 | `instance_id` | 32 lowercase hex characters | Random identifier for this API process lifetime; not a credential. Changes after API restart. |
 | `sequence` | Unsigned 32-bit integer | Cached source/state revision. Advances on source progress or an actual receiver-state transition; not simply on each HTTP request. |
 | `generated_at` | UTC `...Z` string ≤32 chars, or null | Serialization time when UTC is trusted. It never replaces receiver timestamps or establishes freshness. |

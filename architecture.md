@@ -102,23 +102,23 @@ The full flight boundary has a versioned M1 draft schema, detailed contracts and
 synthetic examples under [docs/api](docs/api/README.md). It is not yet frozen or
 implemented in runtime. The [initial local API](docs/local-flight-api.md) already
 occupies `/v1/flights`, with flat fields, Unix-second timestamps and `ok` status.
-It shares `schema_version=1` with the incompatible M1 draft; that number alone
-does not establish conformance. Resolve the wire migration/version before M1
-freeze. Existing endpoints and the implemented route subset are identified
+The canonical draft reserves `/v2/flights` and `schema_version=2` (D013).
+The prototype remains compatible while M2/M3 implement v2 explicitly. Existing endpoints and the implemented route subset are identified
 below. Initial production port is **8080**, configurable separately
 on the Pi and in ESP32 settings. Port **8090** remains a development preview port.
 
 | Endpoint | Responsibility |
 | --- | --- |
-| `GET /v1/flights` | Versioned envelope containing receiver state and bounded normalized candidates. |
+| `GET /v1/flights` | Existing flat prototype, retained unchanged. |
+| `GET /v2/flights` | Versioned envelope containing receiver state and bounded normalized candidates. |
 | `GET /health` | Independent API process, receiver, and reference-data health. Retain existing health fields during migration; legacy `stale` refers to registry age. |
 | `GET /v1/meta` | Active reference generation, provenance, checksums, counts, and update status. Preserve existing metadata fields during migration. |
 | `GET /v1/aircraft/{hex}` | Compatible existing lookup response; document/deprecate ambiguous legacy owner/operator fields rather than silently changing their meaning. |
-| `GET /v1/aircraft/live` | Preserve the legacy adapter during migration; new consumers use `/v1/flights`. |
+| `GET /v1/aircraft/live` | Preserve the legacy adapter during migration; new consumers use `/v2/flights`. |
 | `GET /v1/routes/{callsign}` | Implemented full diagnostic lookup, also used in legacy live enrichment; the new flight feed uses an explicit [compact projection](docs/api/flights.md#64-compact-route-references-and-dated-evidence). |
 | `GET /assets/logos/{content-hash}.rgb565` | Immutable, approved display asset on the same host and port as flight JSON. |
 
-A successfully handled `/v1/flights` request returns HTTP 200 with a valid envelope
+A successfully handled `/v2/flights` request returns HTTP 200 with a valid envelope
 even if the receiver is empty or unavailable. Receiver state is domain data;
 malformed requests and server faults still use appropriate 4xx/5xx responses.
 Consumers reject unsupported schema versions and invalid envelopes safely.

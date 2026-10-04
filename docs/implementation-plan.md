@@ -88,7 +88,7 @@ Depends on M1. Original plan: step 3 and startup parts of step 9.
 - [ ] Detect initialization, healthy empty, missing/malformed/frozen input, clock
   jumps, invalid addresses, and independently stale positions.
 - [ ] Implement geographic/bearing/altitude filters and deterministic capped output.
-- [ ] Add `/v1/flights` and independent receiver/reference diagnostics without
+- [ ] Add `/v2/flights` and independent receiver/reference diagnostics without
   breaking the legacy lookup contract.
 - [ ] Keep API startup functional without a registry or WAN; remove production
   startup's dependency on a successful reference download.

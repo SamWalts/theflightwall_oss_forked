@@ -31,7 +31,7 @@ are not covered by the legacy known/unknown response guarantee.
 
 This lookup stays available for existing simulator/other clients while migration
 proceeds. The ESP32's new production feed must not perform one aircraft lookup
-per candidate; the Pi performs bounded indexed joins before building `/v1/flights`.
+per candidate; the Pi performs bounded indexed joins before building `/v2/flights`.
 
 ## 2. `GET /v1/aircraft/live`
 
@@ -94,8 +94,8 @@ Additive receiver/capability/general-manifest summaries are described in
 a receiver/card expiry signal.
 
 The implemented [initial local feed](../local-flight-api.md) on port 8080 is also
-distinct from the canonical M1 draft. The shared version number does not establish
-wire compatibility; the migration/version must be resolved before freeze.
+distinct from the canonical M1 draft. The prototype retains `/v1/flights` and version 1; canonical M1 reserves
+`/v2/flights` and version 2 (D013). Neither endpoint may silently change shape.
 
 Port 8090 belongs to the development simulator/preview. Its existing synthetic
 `/v1/flights` is not the production contract on port 8080. M2/M3 migration must
@@ -106,7 +106,7 @@ prove only the baseline synthetic enrichment flow.
 ## 5. Error and transition rules
 
 - Keep legacy known/unknown lookup and route response shapes compatible.
-- New production `/v1/flights` returns domain receiver states with HTTP 200;
+- New production `/v2/flights` returns domain receiver states with HTTP 200;
   malformed requests use 400, unsupported methods 405, internal faults 500 and
   busy worker pools 503. These new target rules do not rewrite older handlers.
 - Unknown paths return 404. Canonical error JSON is bounded

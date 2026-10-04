@@ -22,7 +22,8 @@ than creating a worktree unless the user requests one.
 
 - Current firmware uses the initial local Pi feed; cloud adapters remain legacy
   source excluded from the build. The prototype is incompatible with the M1
-  draft despite sharing `schema_version=1`. Canonical migration remains M2/M3.
+  draft, now reserved at `/v2/flights` with `schema_version=2`. Keep the v1
+  prototype compatible. Canonical migration remains M2/M3.
 - Keep flight operation independent of WAN, cloud APIs, and reference downloads.
   New local production code must not silently fall back to external adapters.
 - Reuse the existing readsb/SDR installation. Discover real paths and coordinates;

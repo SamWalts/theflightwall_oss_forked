@@ -46,8 +46,8 @@ milestones when implementation changes; do not erase the source plan's history.
   Initial `/v1/flights` now uses a one-second-cached local file/HTTP snapshot and
   emits partial flat telemetry. It has no route/logo join, geographic ordering,
   producer byte bound or canonical progress/clock state machine. See
-  [prototype contract](local-flight-api.md); its `schema_version=1` is incompatible
-  with the nested M1 draft.
+  [prototype contract](local-flight-api.md); its `schema_version=1` remains distinct
+  from the nested M1 draft at `/v2/flights`, schema version 2 (D013).
 - Route maintenance: `route_pipeline.py` streams selected or explicitly worldwide
   VRS tables into immutable SQLite generations, retains notices/checksums, and
   atomically activates/rolls back. `route_reference.py` handles exact/alias
@@ -103,10 +103,9 @@ Live processes and temporary state must not be assumed to survive restoration.
 
 ## Next useful task
 
-Review/freeze M1 draft 0.1 and continue M0's actual receiver/toolchain baseline.
+Review/freeze M1 flight draft 0.2 and continue M0's actual receiver/toolchain baseline.
 Receiver access is needed to confirm path/coordinates/export cadence and draft
-4 MiB/512-row input limits. Resolve the prototype/canonical wire migration/version
-before freeze, then extend the cached reader with M2's clock/progress state machine,
+4 MiB/512-row input limits. The wire version collision is resolved by D013; implement v2 explicitly, then extend the cached reader with M2's clock/progress state machine,
 filters and byte-bounded feed using the shared schemas/examples. Migrate the M3
 Pi consumer to those envelopes and measure its complete memory footprint. The
 implemented full diagnostic route object needs the documented compact projection,
@@ -139,9 +138,33 @@ not executable replay generators. Earlier Docker results remain prior evidence;
 the new Pi tests and native packaging check above cover this source merge.
 PlatformIO is unavailable here, so firmware builds remain unverified.
 
-The separate screen-mockup review is awaiting the branch or image path. The earlier
-branch review found the original wall photo but no identified new mockup set;
-do not claim visual contract acceptance without those images.
+## Screen/dev integration review, 2026-10-04
+
+Reviewed dev `61178bb` and design/flightwall-screens `c1b274e`. Combined them on
+`review/flightwall-conflicts`; resolved the README conflict by retaining current
+local-feed status and adding the gallery links. The design branch is based on
+`500a49c`; its absence of newer dev files is branch divergence, not an instruction
+to remove route implementation, contracts, or the working Pi firmware path.
+
+Resolved the flight wire-version collision: canonical flight draft 0.2 is now
+`/v2/flights`, `schema_version=2`, with a renamed producer schema and updated shared
+envelopes. Working v1 runtime/firmware and v1 route/logo contracts remain compatible.
+D013 records migration and screen semantics. The screen projection uses canonical
+fields, reference/dated/verified route labels, ambiguous-leg protection, city-code
+fallbacks and barometric-only VS. Regenerated the gallery, PNG/SVGs and PDF.
+
+New evidence: all 25 Pi regression tests and five shared-fixture screen projection
+tests pass. Contract checker passes three schemas, 40 expected example outcomes
+and seven timing cases. All 34 screen sets pass native/serialized pixel and logo
+checksum checks; Chromium verifies gallery controls, downloads, navigation and
+390/768/1440px layouts without external requests or browser errors. No hardware,
+firmware build, deployment, or canonical runtime acceptance is claimed.
+
+Outstanding review input: `flightwall-screen-contract-review.md` was not found
+in the workspace or any fetched branch history. Its specific findings cannot be
+verified until that file or its contents are supplied. Independently discovered
+Git/API/design conflicts above are resolved. Next: reconcile that missing review
+if available, then implement M2/M3 v2 and continue receiver/hardware acceptance.
 
 ## Handoff maintenance
 

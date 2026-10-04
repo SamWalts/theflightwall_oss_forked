@@ -31,6 +31,11 @@ This is the open source version with some basic guides to the panels, mounting t
 *Original wall photo. AeroAPI logo metadata belongs to the legacy firmware;
 the initial local feed does not yet supply airline logos.*
 
+## New screen designs for review
+
+The [screen review package](docs/screens/README.md) proposes five flight pages with airline emblems, [no-departure options](docs/screens/mockups/no-departure-options.png), system states, and partial-data fallbacks for the 160×32 wall. Open the [interactive mockups](docs/screens/review.html) or [review PDF](docs/screens/flightwall-screen-review.pdf). Firmware integration is separate.
+
+
 # Component List
 - Main components
     - 20x [16x16 LED panels](https://www.aliexpress.us/item/2255800358269772.html)

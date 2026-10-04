@@ -227,8 +227,7 @@ flagged; identity keys are never shortened into different plausible identities.
 
 Integration note, 2026-10-04: main's initial local feed/parser was merged into dev.
 It follows [the prototype API](local-flight-api.md), with flat fields and
-Unix-second timestamps, rather than this draft. Both use `schema_version=1`;
-resolve the explicit wire migration/version before freezing M1. This integration
+Unix-second timestamps, rather than this draft. At integration both used `schema_version=1`; D013 now separates their versions. This integration
 does not change the canonical draft or establish M2/M3 acceptance.
 
 Consequence: schema checks provide reviewable M1 design evidence, not receiver,
@@ -263,3 +262,20 @@ facts, not proof of the full decoder/API workload on the target Pi.
 
 Resolve independent repository work with synthetic inputs while access is absent.
 Never replace an unknown installation fact with the repository's sample value.
+
+## D013 — Separate prototype and canonical flight versions
+
+2026-10-04, screen/dev integration. Preserve the implemented flat `/v1/flights`
+and schema version 1. Reserve `/v2/flights` and schema version 2 for the nested
+M1 draft 0.2. Update the draft schema and shared envelopes together; logo and
+route diagnostic versions remain 1. Do not reinterpret v1 in place or detect
+versions by guessing field shape. M2 must implement v2 and M3 must explicitly
+switch its parser/endpoint before canonical acceptance. This resolves the wire
+identity collision without claiming the canonical runtime exists.
+
+Screen views consume a validated canonical projection. Reference routes are
+labeled `REFERENCE ROUTE`; applicable dated overrides use `DATED ROUTE`, or
+`VERIFIED ROUTE` only with current aircraft-specific evidence. Multi-stop routes
+never invent an active pair. City labels and observed/inferred airport events
+remain optional future enrichment, with airport-code fallbacks today. Review
+artwork remains unapproved for production.

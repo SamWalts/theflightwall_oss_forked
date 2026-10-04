@@ -53,7 +53,7 @@ researched BAW/UAL import, not live traffic.
 
 | Draft field | Bound / responsibility |
 | --- | --- |
-| `instance_id` | Same process ID as `/v1/flights`. |
+| `instance_id` | Same process ID as `/v2/flights`. |
 | `supported_contracts` | At most eight entries `{name, version, path}` identifying actually implemented contracts. Names ≤32 ASCII, versions positive bounded integers, paths ≤96 relative characters. |
 | `receiver` | Same receiver object/semantics as [flight contract](flights.md), when M2 is supported. No separate definition of freshness. |
 | `selection_status` | `ready` / `unconfigured`, independent of radio state. |
@@ -148,7 +148,7 @@ no-store and never use 304 in the first feed contract.
 | HTTP timeout/5xx/bad JSON | Diagnostic/request failure, not proof of healthy empty sky. |
 
 Neither response should cause the wall to reset a card's age. The single
-authoritative live state and data-age rules come from `/v1/flights` when implemented.
+authoritative live state and data-age rules come from `/v2/flights` when implemented.
 Deployment/pollers must not infer that endpoint exists merely from the current
 metadata `schema_version=1`.
 
