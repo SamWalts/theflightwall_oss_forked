@@ -28,6 +28,7 @@ import on the Pi; local landing observations are a separate optional feature.
 | [Implementation checklist](implementation-plan.md) | Milestones, dependencies, acceptance criteria, and status. |
 | [Decisions](decisions.md) | Design rationale, provisional choices, and unresolved facts. |
 | [Pi-to-ESP32 contracts](api/README.md) | M1 draft feed/asset/health/meta/legacy contracts, schemas and status map. |
+| [Screen contract review](screen-contract-review.md) | Reviewed design snapshot, M1 mismatches, merge blockers, and PlatformIO setup status. |
 | [Receiver inventory](adsb-receiver-data.md) | What aircraft radio messages, readsb calculations/bookkeeping and external annotations can provide. |
 | [Enrichment joins](api/enrichment-joins.md) | Hex-to-aircraft, callsign-to-airline/ordered-route and operator-to-approved-logo keys and failure rules. |
 | [Route lookup research](route-detection.md) | Verified free callsign-route data for overflights, Google/manual verification, API alternatives, and current-flight limits. |
@@ -98,7 +99,8 @@ milestones when implementation changes; do not erase the source plan's history.
 
 Docker CLI/Buildx state needed `DOCKER_CONFIG=/tmp/flightwall-docker-config` during
 onboarding because the cloud home directory was read-only. Python 3.12 and Docker
-Compose are available in this workspace; PlatformIO was not installed at review.
+Compose are available in this workspace. PlatformIO Core 6.2.0 is now installed
+as recorded in the screen review below; firmware compilation remains blocked.
 Live processes and temporary state must not be assumed to survive restoration.
 
 ## Next useful task
@@ -136,7 +138,10 @@ examples and the optional offline checker in `docs/api/`. Logo hashes are mock
 metadata with no corresponding approved images. Large-input descriptions are
 not executable replay generators. Earlier Docker results remain prior evidence;
 the new Pi tests and native packaging check above cover this source merge.
-PlatformIO is unavailable here, so firmware builds remain unverified.
+PlatformIO Core 6.2.0 is installed in `/workspace/.venvs/flightwall-platformio`.
+Project configuration checks passed, but ESP32 platform installation received
+HTTP 403 from the environment proxy before compilation. The saved environment
+draft needs publication and registry access verification before builds can resume.
 
 ## Screen/dev integration review, 2026-10-04
 
@@ -151,20 +156,23 @@ Resolved the flight wire-version collision: canonical flight draft 0.2 is now
 envelopes. Working v1 runtime/firmware and v1 route/logo contracts remain compatible.
 D013 records migration and screen semantics. The screen projection uses canonical
 fields, reference/dated/verified route labels, ambiguous-leg protection, city-code
-fallbacks and barometric-only VS. Regenerated the gallery, PNG/SVGs and PDF.
+fallbacks and distinct VS/GVS rate labels, canonical identifiers, neutral unknown-operator
+badges and receiver/viewing state mapping. Regenerated the gallery, PNG/SVGs and PDF.
 
-New evidence: all 25 Pi regression tests and five shared-fixture screen projection
+New evidence: all 25 Pi regression tests and ten shared-fixture screen projection
 tests pass. Contract checker passes three schemas, 40 expected example outcomes
-and seven timing cases. All 34 screen sets pass native/serialized pixel and logo
+and seven timing cases. All 39 screen sets pass native/serialized pixel and logo
 checksum checks; Chromium verifies gallery controls, downloads, navigation and
 390/768/1440px layouts without external requests or browser errors. No hardware,
 firmware build, deployment, or canonical runtime acceptance is claimed.
 
-Outstanding review input: `flightwall-screen-contract-review.md` was not found
-in the workspace or any fetched branch history. Its specific findings cannot be
-verified until that file or its contents are supplied. Independently discovered
-Git/API/design conflicts above are resolved. Next: reconcile that missing review
-if available, then implement M2/M3 v2 and continue receiver/hardware acceptance.
+The review report was published on dev as [screen-contract-review.md](screen-contract-review.md)
+in commit `2ce1328`. All seven findings are reconciled; the report now records each
+correction and its verification. The integration includes that review commit and
+resolves the project-context conflict by preserving its PlatformIO setup evidence.
+Destination-only/inferred-departure concepts are explicitly deferred in the gallery
+and exports. Next: implement M2/M3 v2 and continue receiver/hardware acceptance.
+
 
 ## Handoff maintenance
 

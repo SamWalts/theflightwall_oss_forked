@@ -25,7 +25,7 @@ class QuietHandler(SimpleHTTPRequestHandler):
 
 def check_exports():
     scenes = json.loads((ROOT / "screens.json").read_text())
-    assert len(scenes) == 34
+    assert len(scenes) == 39
     assert len([s for s in scenes if s["group"] == "departure"]) == 7
     for scene in scenes:
         for suffix in ("-native.png", ".png", ".svg"):
@@ -46,7 +46,7 @@ def check_exports():
         with Image.open(path) as logo:
             assert logo.size == (24, 24)
     assert (ROOT / "flightwall-screen-review.pdf").read_bytes().startswith(b"%PDF-")
-    print("PASS: 34 export sets, serialized/native pixel agreement, logo checksums, and review PDF.")
+    print("PASS: 39 export sets, serialized/native pixel agreement, logo checksums, and review PDF.")
 
 
 def check_browser(executable, screenshots):
@@ -82,7 +82,7 @@ def check_browser(executable, screenshots):
                 page.select_option("#scenario", "no-departure-telemetry")
                 assert page.locator(".thumb").count() == 7
                 assert page.locator('[data-filter="departure"]').get_attribute("aria-pressed") == "true"
-                assert "N123AB C172; ALT 4500FT; GS 112KT" in page.locator("#display").get_attribute("aria-label")
+                assert "AB12CD C172; ALT 4500FT; GS 112KT" in page.locator("#display").get_attribute("aria-label")
                 assert page.locator("#counter").inner_text() == "01 / 07"
                 assert "No-departure display option" == page.locator("#scene-category").text_content()
                 page.locator("#next").click()
@@ -92,12 +92,13 @@ def check_browser(executable, screenshots):
                 page.select_option("#scenario", "no-departure-explicit")
                 assert "FROM UNKNOWN" in page.locator("#display").get_attribute("aria-label")
                 page.select_option("#scenario", "no-departure-business-jet")
-                assert "N456CJ C25B; ALT 31000FT; GS 410KT" in page.locator("#display").get_attribute("aria-label")
+                assert "AC34EF C25B; ALT 31000FT; GS 410KT" in page.locator("#display").get_attribute("aria-label")
                 page.select_option("#scenario", "no-departure-destination")
                 assert "FROM -- TO EGLL; MANUAL TO" in page.locator("#display").get_attribute("aria-label")
                 assert page.locator("#airline").input_value() == "united"
+                assert page.locator("#preview-kind").inner_text() == "FUTURE CONCEPT"
                 page.select_option("#scenario", "no-departure-unidentified")
-                assert "HEX AD56EF --" in page.locator("#display").get_attribute("aria-label")
+                assert "AD56EF --" in page.locator("#display").get_attribute("aria-label")
                 page.locator("#next").click()
                 assert "Aircraft + telemetry" in page.locator("#stage-title").inner_text()
                 page.goto(url + "#no-departure-nearby")
@@ -116,7 +117,7 @@ def check_browser(executable, screenshots):
                 assert page.locator(".thumb").count() == 6
                 assert page.locator('[data-filter="case"]').get_attribute("aria-pressed") == "true"
                 page.select_option("#scenario", "case-anonymous")
-                assert "HEX ABC123 C172" in page.locator("#display").get_attribute("aria-label")
+                assert "ABC123 C172" in page.locator("#display").get_attribute("aria-label")
                 assert "GS 0KT" in page.locator("#display").get_attribute("aria-label")
                 page.select_option("#scenario", "case-ground")
                 assert "ALT GROUND" in page.locator("#display").get_attribute("aria-label")
@@ -124,13 +125,20 @@ def check_browser(executable, screenshots):
 
                 page.select_option("#scenario", "state-pi")
                 assert page.locator('[data-filter="state"]').get_attribute("aria-pressed") == "true"
-                assert page.locator(".thumb").count() == 6
+                assert page.locator(".thumb").count() == 11
                 assert "PI UNAVAILABLE; WIFI CONNECTED" in page.locator("#display").get_attribute("aria-label")
                 assert "DAL456" not in page.locator("#display").get_attribute("aria-label")
+                for key, text in (("initializing", "RECEIVER STARTING"), ("unavailable", "RECEIVER UNAVAILABLE"),
+                                  ("invalid", "RECEIVER INVALID"), ("config", "SET VIEW LOCATION"),
+                                  ("expired", "AIRCRAFT EXPIRED")):
+                    page.select_option("#scenario", "state-" + key)
+                    assert text in page.locator("#display").get_attribute("aria-label")
+                    assert "DAL456" not in page.locator("#display").get_attribute("aria-label")
                 page.locator('[data-filter="all"]').click()
-                assert page.locator(".thumb").count() == 24
+                assert page.locator(".thumb").count() == 29
                 page.locator('[data-id="case-inferred_route"]').click()
                 assert "KATL?>----" in page.locator("#display").get_attribute("aria-label")
+                assert page.locator("#preview-kind").inner_text() == "FUTURE CONCEPT"
 
                 page.goto(url + "#motion-united")
                 page.reload()
@@ -139,7 +147,7 @@ def check_browser(executable, screenshots):
                 page.goto(url + "#state-receiver")
                 page.reload()
                 assert "RECEIVER STALE" in page.locator("#display").get_attribute("aria-label")
-                assert page.locator(".thumb").count() == 6
+                assert page.locator(".thumb").count() == 11
 
                 # Compare the flat canvas at known LED coordinates with the actual exported pixels.
                 page.goto(url + "#overview-delta")

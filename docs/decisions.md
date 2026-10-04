@@ -276,6 +276,9 @@ identity collision without claiming the canonical runtime exists.
 Screen views consume a validated canonical projection. Reference routes are
 labeled `REFERENCE ROUTE`; applicable dated overrides use `DATED ROUTE`, or
 `VERIFIED ROUTE` only with current aircraft-specific evidence. Multi-stop routes
-never invent an active pair. City labels and observed/inferred airport events
+never invent an active pair. Default cards use the canonical display identifier, leaving registration in details.
+Unknown operators use a neutral badge. Receiver states and unconfigured viewing
+settings have distinct screens; explicit `GVS` identifies geometric rate.
+City labels and observed/inferred airport events
 remain optional future enrichment, with airport-code fallbacks today. Review
 artwork remains unapproved for production.

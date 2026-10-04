@@ -15,13 +15,13 @@
       "true_airspeed_kt": null,
       "origin": {
         "icao": "KATL",
-        "city": "ATLANTA",
-        "source": "reference"
+        "source": "reference",
+        "display_code": "ATL"
       },
       "destination": {
         "icao": "KJFK",
-        "city": "NEW YORK",
-        "source": "reference"
+        "source": "reference",
+        "display_code": "JFK"
       }
     },
     "united": {
@@ -38,13 +38,13 @@
       "true_airspeed_kt": 470,
       "origin": {
         "icao": "KSFO",
-        "city": "SAN FRANCISCO",
-        "source": "reference"
+        "source": "reference",
+        "display_code": "SFO"
       },
       "destination": {
         "icao": "EGLL",
-        "city": "LONDON",
-        "source": "reference"
+        "source": "reference",
+        "display_code": "LHR"
       }
     },
     "southwest": {
@@ -61,19 +61,19 @@
       "true_airspeed_kt": null,
       "origin": {
         "icao": "KOAK",
-        "city": "OAKLAND",
-        "source": "reference"
+        "source": "reference",
+        "display_code": "OAK"
       },
       "destination": {
         "icao": "KLAX",
-        "city": "LOS ANGELES",
-        "source": "reference"
+        "source": "reference",
+        "display_code": "LAX"
       }
     },
     "partial": {
       "hex": "AABBCC",
       "callsign": "XYZ42",
-      "operator_icao": "XYZ",
+      "operator_icao": null,
       "airline_short": null,
       "aircraft_type": null,
       "registration": null,
@@ -201,7 +201,8 @@
         "icao": "EGLL",
         "city": "LONDON",
         "source": "manual"
-      }
+      },
+      "deferred": true
     },
     "inferred_route": {
       "hex": "A4B5C6",
@@ -220,7 +221,8 @@
         "city": "ATLANTA",
         "source": "inferred"
       },
-      "destination": null
+      "destination": null,
+      "deferred": true
     }
   },
   "states": {
@@ -283,6 +285,56 @@
       ],
       "icon": "radar",
       "accent": "cyan"
+    },
+    "initializing": {
+      "title": "RECEIVER STARTING",
+      "lines": [
+        "RECEIVER STARTING",
+        "AWAITING PROGRESS",
+        "NO LIVE DATA"
+      ],
+      "icon": "radar",
+      "accent": "amber"
+    },
+    "unavailable": {
+      "title": "RECEIVER UNAVAILABLE",
+      "lines": [
+        "RECEIVER UNAVAILABLE",
+        "CHECK READSB PATH",
+        "NO LIVE DATA"
+      ],
+      "icon": "server",
+      "accent": "amber"
+    },
+    "invalid": {
+      "title": "RECEIVER INVALID",
+      "lines": [
+        "RECEIVER INVALID",
+        "CHECK READSB JSON",
+        "NO LIVE DATA"
+      ],
+      "icon": "warning",
+      "accent": "amber"
+    },
+    "config": {
+      "title": "SET VIEW LOCATION",
+      "lines": [
+        "SET VIEW LOCATION",
+        "CHECK PI SETTINGS",
+        "NO VIEW CONFIG"
+      ],
+      "icon": "warning",
+      "accent": "amber"
+    },
+    "expired": {
+      "title": "AIRCRAFT EXPIRED",
+      "lines": [
+        "AIRCRAFT EXPIRED",
+        "WAITING FOR FEED",
+        "NO LIVE DATA"
+      ],
+      "icon": "radar",
+      "accent": "amber"
     }
   },
   "design_fixture_version": 1

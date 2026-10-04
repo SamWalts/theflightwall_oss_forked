@@ -115,7 +115,7 @@
           </div>
         </aside>
         <div class="stage">
-          <div class="stage-top"><div class="stage-title" id="stage-title">F01 · Flight overview / Delta</div><span class="badge">DESIGN PREVIEW</span></div>
+          <div class="stage-top"><div class="stage-title" id="stage-title">F01 · Flight overview / Delta</div><span class="badge" id="preview-kind">DESIGN PREVIEW</span></div>
           <div class="wall-space">
             <div class="wall" id="wall"><canvas id="display" width="1280" height="256" role="img" aria-label="Flight overview"></canvas><div class="zone-overlay"><span class="zone-logo"></span><span class="zone-text"></span></div></div>
             <p class="zone-legend">Logo: 24 × 24 at (4, 4). Text: x = 37; y = 3, 12, 21. Font: 5 × 7, 6 px advance.</p>
@@ -130,7 +130,7 @@
         </div>
       </section>
       <section aria-labelledby="library-title">
-        <div class="library-head"><h2 id="library-title">The screen collection</h2><div class="filters" role="group" aria-label="Filter collection"><button data-filter="flight" aria-pressed="true">Flight screens · 5</button><button data-filter="departure" aria-pressed="false">No departure · 7</button><button data-filter="case" aria-pressed="false">Data cases · 6</button><button data-filter="state" aria-pressed="false">System states · 6</button><button data-filter="all" aria-pressed="false">All screens · 24</button></div></div>
+        <div class="library-head"><h2 id="library-title">The screen collection</h2><div class="filters" role="group" aria-label="Filter collection"><button data-filter="flight" aria-pressed="true">Flight screens · 5</button><button data-filter="departure" aria-pressed="false">No departure · 7</button><button data-filter="case" aria-pressed="false">Data cases · 6</button><button data-filter="state" aria-pressed="false">System states · 11</button><button data-filter="all" aria-pressed="false">All screens · 29</button></div></div>
         <div class="gallery" id="gallery"></div>
       </section>
     </main>
@@ -169,6 +169,7 @@
       element('stage-title').textContent = selected.code + ' · ' + selected.title + (selected.airline ? ' / ' + names[selected.airline] : '');
       element('scene-category').textContent = selected.group === 'flight' ? (selected.page === 'overview' ? 'Default flight page' : 'Optional flight page') : selected.group === 'departure' ? 'No-departure display option' : selected.group === 'case' ? 'Incomplete data example' : 'System status';
       element('scene-note').textContent = selected.note;
+      element('preview-kind').textContent = selected.deferred ? 'FUTURE CONCEPT' : 'DESIGN PREVIEW';
       ['png', 'svg', 'native'].forEach(format => {
         element(format + '-link').href = 'mockups/' + selected.id + (format === 'native' ? '-native.png' : '.' + format);
       });

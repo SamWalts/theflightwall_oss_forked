@@ -1,6 +1,6 @@
 # Flight wall screen review
 
-Prepared October 3, 2026. **Design proposal for review.** The package contains five flight-page designs, seven no-departure/private-aircraft examples, six system states, six partial-data examples, and Delta, United, and Southwest logo variants: **34 rendered screens**. Firmware and live data behavior are not changed by these files.
+Prepared October 3, 2026; aligned with M1 on October 4, 2026. **Design proposal for review.** The package contains five flight-page designs, seven no-departure/private-aircraft examples, eleven system states, six partial-data examples, and Delta, United, and Southwest logo variants: **39 rendered screens**. Firmware and live data behavior are not changed by these files.
 
 Start with the [interactive review](review.html) or [five-page review PDF](flightwall-screen-review.pdf). The gallery works offline, includes airline selection, page navigation, no-departure options, status examples, a demo cycle, brightness preview, and layout guides. Its flight collection shows five pages for the selected airline; the complete package includes fifteen airline/page combinations. Choose **No departure** in the collection, or **No departure / private aircraft** in the example menu, to review the seven new examples.
 
@@ -10,8 +10,8 @@ Start with the [interactive review](review.html) or [five-page review PDF](fligh
 | [Airline logo contact sheet](mockups/airline-logos.png) | Three airline emblems at their intended display size |
 | [No-departure options](mockups/no-departure-options.png) | Five layout choices, with light aircraft, business jet, unidentified aircraft, and destination-only examples |
 | [Partial-data contact sheet](mockups/data-fallbacks.png) | Missing airline, callsign, route, and telemetry; ground and zero values |
-| [System-state contact sheet](mockups/system-states.png) | Boot, setup, Wi-Fi loss, Pi failure, stale receiver, healthy empty sky |
-| [Mockup directory](mockups/) | Native 160×32 PNGs, enlarged LED PNGs, and pixel-exact SVGs for all 34 screens |
+| [System-state contact sheet](mockups/system-states.png) | Boot/setup, Wi-Fi/Pi failures, receiver states, viewing configuration, aircraft expiry, healthy empty sky |
+| [Mockup directory](mockups/) | Native 160×32 PNGs, enlarged LED PNGs, and pixel-exact SVGs for all 39 screens |
 | [Design fixtures](fixtures.json) | Synthetic review data, not a new production API |
 | [Logo manifest](assets/manifest.json) | Artwork source, dimensions, checksums, and review-only approval status |
 
@@ -52,7 +52,7 @@ The border is quieter than the photographed wall's bright white border, to keep 
 | F02 | Motion details | `DAL456 A321` / `VS +1200FT/M` / `IAS 280KT` | Rotate after F01 when a vertical-rate or airspeed value is present |
 | F03 | Airline and airframe | `DELTA AIR LINES` / `DAL456` / `A321 N456DL` | Optional identity page; uses the resolved airline with reference provenance |
 | F04 | Airport route | `DAL456 A321` / `KATL>KJFK` / `REFERENCE ROUTE` | Optional; enable automatic display only when at least one route endpoint has a valid local source |
-| F05 | From / to cities | `FROM ATLANTA` / `TO NEW YORK` / `REFERENCE ROUTE` | Optional commercial-style page; same sourced endpoints as F04; airport display codes when city data is absent |
+| F05 | From / to airports | `FROM ATL` / `TO JFK` / `REFERENCE ROUTE` | Optional commercial-style page; same sourced endpoints as F04; airport display codes when city data is absent |
 
 The review's sample flights and registrations are fictional. The fixture hex addresses are illustrative. `DAL456`, `UAL123`, and `SWA789` are callsigns; this design does not silently turn them into marketing/codeshare flight numbers.
 
@@ -63,11 +63,11 @@ Use static pages and direct transitions. Avoid marquee text and flashing telemet
 ### Units and missing information
 
 - `ALT` is **barometric altitude in feet**; `GS` is **ground speed in knots**. Ground altitude renders as `ALT GROUND`, not `ALT 0FT`.
-- `VS` is **barometric vertical rate in feet per minute** in this proposal. Render a positive sign for climbs, a negative sign for descents, and `VS 0FT/M` for a received zero. A geometric-only rate needs a separately labeled page/field before use; do not silently mix altitude/rate sources.
+- `VS` is **barometric vertical rate in feet per minute** in this proposal. Render a positive sign for climbs, a negative sign for descents, and `VS 0FT/M` for a received zero. A geometric-only rate uses the explicit `GVS` label, for example `GVS -640FT/M`; it is never shown as barometric VS.
 - `IAS` and `TAS` keep their own labels. Prefer decoded IAS; use decoded TAS when IAS is absent. If both are absent, render `IAS --KT` in a manually requested details page. Ground speed is never an airspeed fallback.
 - Absent values use `--` with the original unit, for example `ALT --FT`. A received numeric zero remains zero.
-- Identity falls back from received callsign to registration to `HEX ABC123`. Type can be unknown without suppressing the flight. Registered owner is not treated as the operating airline.
-- Airline selection uses the operating ICAO code. If a known operator's logo cannot be loaded, retain a readable code badge. An unknown operator uses its supplied code, or a neutral `AIR` badge when no code is known.
+- Default identity uses canonical `display_identifier`: a usable received identifier, otherwise `ABC123`. Registration stays in identity/airframe details. Type can be unknown without suppressing the flight. Registered owner is not treated as the operating airline.
+- Airline selection uses the recognized resolved ICAO code. If a known operator's logo cannot be loaded, retain a readable code badge. An unknown operator has null codes and uses a neutral `AIR` badge. Never resolve an airline from an unrecognized callsign prefix.
 - Truncate long **names** after 17 characters with `...` to fit the 20-character row. Preserve identifiers through field-specific bounds. Metric validation/formatting must preserve the number and unit; never ellipsize a numeric measurement into a misleading value. These fixtures already fit the layout.
 
 ### Route provenance
@@ -81,16 +81,20 @@ A multi-stop reference has no known active leg: show `MULTI-STOP ROUTE` with
 unknown endpoints, or the telemetry fallback. Never choose the first/last pair.
 
 The [canonical projection](render_mockups.py) maps validated v2 candidates into
-review fields. It does not fetch a feed, validate freshness or implement firmware.
-The caller must apply M1 monotonic expiry and clear expired dated associations.
+review fields. `canonical_display` maps receiver/selection states and elapsed ages before rendering.
+It does not fetch a feed or implement firmware. The caller must validate the envelope
+and retain original monotonic request/deadline anchors across repeated responses.
+Expired dated routes fall back to a retained reference; expired operator evidence
+drops its code/name/logo independently of live telemetry.
 M1 includes airport codes/display codes but no city names; F05 falls back to those
 codes. City names require separate approved enrichment before production use.
 The manual destination and inferred-departure mockups remain future design
 examples: M1's observed event fields are null and inference is not implemented.
 Unsupported endpoints must stay unknown in the live view.
 
-Keep endpoints independently nullable. Missing endpoints use `----` on F04 and
-`--` on F05. The legacy future-event examples mark inferred endpoints with `?`
+Canonical two-stop routes supply both endpoints; ambiguous multi-stop routes
+supply neither active-leg endpoint. Missing endpoints use `----` on F04 and
+`--` on F05. Independently nullable endpoints belong only to the deferred concepts. The legacy future-event examples mark inferred endpoints with `?`
 and visible provenance. The route-unavailable example is for review; automatic
 rotation uses the no-departure policy instead of an entirely unknown route.
 
@@ -104,20 +108,20 @@ The recommendation is **N01 Aircraft + telemetry** as the default. A neutral pla
 
 | Option | Example rows | When to choose it |
 | --- | --- | --- |
-| N01 — Aircraft + telemetry **(recommended)** | `N123AB C172` / `ALT 4500FT` / `GS 112KT` | Replace a missing departure/route with aircraft identity and useful measured values; works for private aircraft and airline flights |
+| N01 — Aircraft + telemetry **(recommended)** | `AB12CD C172` / `ALT 4500FT` / `GS 112KT` | Replace a missing departure/route with aircraft identity and useful measured values; works for private aircraft and airline flights |
 | N02 — Registration + model | `N123AB` / `CESSNA 172` / `HEX AB12CD` | Prefer the airframe itself over route information; use a locally known model/type and registration when available |
-| N03 — Nearby distance + track | `N123AB C172` / `DIST 1.8KM` / `TRK 090DEG` | Optional spatial detail when fresh position and a confirmed receiver/home location are available |
-| N04 — Departure unavailable | `N123AB C172` / `FROM UNKNOWN` / `ALT 4500FT` | Explicitly acknowledge missing departure while keeping identity and a useful measurement visible |
-| N05 — Known destination only | `UAL123 B789` / `FROM -- TO EGLL` / `MANUAL TO` | Departure is unknown but the destination has its own valid source; retain that destination and its provenance |
+| N03 — Nearby distance + track | `AB12CD C172` / `DIST 1.8KM` / `TRK 090DEG` | Optional spatial detail when fresh position and a confirmed receiver/home location are available |
+| N04 — Departure unavailable | `AB12CD C172` / `FROM UNKNOWN` / `ALT 4500FT` | Explicitly acknowledge missing departure while keeping identity and a useful measurement visible |
+| N05 — Known destination only **(deferred)** | `UAL123 B789` / `FROM -- TO EGLL` / `MANUAL TO` | Departure is unknown but the destination has its own valid source; retain that destination and its provenance |
 
-The seven new mockups include these five options plus N01 variants for a **business jet** (`N456CJ C25B`) and an **unidentified aircraft** (`HEX AD56EF --`). The business jet uses the same readable telemetry hierarchy; the unidentified example remains displayable with no callsign, registration, type, or airline.
+The seven new mockups include these five options plus N01 variants for a **business jet** (`AC34EF C25B`) and an **unidentified aircraft** (`AD56EF --`). The business jet uses the same readable telemetry hierarchy; the unidentified example remains displayable with no callsign, registration, type, or airline.
 
-Proposed settings are a no-departure style (`telemetry`, `identity`, `nearby`, or `explicit`) and a separate **keep known destination** preference, enabled by default. The [design selector](render_mockups.py) demonstrates this order for a route/city page request:
+Proposed settings are a no-departure style (`telemetry`, `identity`, `nearby`, or `explicit`) and a future **keep known destination** preference. N05 is marked **FUTURE CONCEPT** in the gallery and excluded from canonical production behavior. The [design selector](render_mockups.py) demonstrates this order for a route/city page request:
 
-1. If departure has a supported reference or applicable dated source, use the sourced route treatment, retaining `?` for an inference. Expired or low-confidence candidates must already be cleared by the local enrichment layer.
-2. If departure is absent and keeping a known destination is enabled, show N05 only when that destination has a supported source. An unsourced airport candidate is not enough.
+1. If departure has a supported reference or applicable dated source, use the reference/dated route treatment. Inference is excluded from the canonical projection. Expired or low-confidence candidates must already be cleared by the local enrichment layer.
+2. If departure is absent and keeping a known destination is enabled, N05 requires a future documented endpoint-specific contract. The current canonical projection cannot produce this option.
 3. Otherwise show the chosen no-departure style. If an identity/nearby style has no useful fields, fall back to N01; do not invent them.
-4. Keep identifier precedence: received callsign, then registration, then hex. Keep missing metrics explicit and preserve received zero values. Failure/freshness state screens still take priority over every flight layout.
+4. Use the canonical display identifier on default cards; keep registration in the airframe details. Keep missing metrics explicit and preserve received zero values. Failure/freshness state screens still take priority over every flight layout.
 
 These are **review choices**, not newly installed device settings. No-departure options replace a requested F04/F05 slot; they are not added as five mandatory pages. N01 can remain the normal six-second F01 overview, with F02 for four seconds when useful. If the replacement is identical to an already shown F01, suppress the duplicate. An explicitly enabled N02/N03/N04/N05 detail uses the normal four-second optional-page dwell on the same selected aircraft. Missing an airport alone never extends the cycle or discards the flight.
 
@@ -127,11 +131,11 @@ For N03, `DIST` means **horizontal ground distance in kilometers** from a confir
 
 | ID | Example | Required visible result |
 | --- | --- | --- |
-| C01 | Unknown operator and missing altitude/type | `XYZ` badge, `XYZ42 --`, `ALT --FT`, and valid `GS 210KT` |
-| C02 | Missing callsign/registration, received zero speed | Neutral `AIR` badge, `HEX ABC123 C172`, and `GS 0KT` |
+| C01 | Unknown operator and missing altitude/type | Neutral `AIR` badge, `XYZ42 --`, `ALT --FT`, and valid `GS 210KT` |
+| C02 | Missing callsign/registration, received zero speed | Neutral `AIR` badge, `ABC123 C172`, and `GS 0KT` |
 | C03 | Ground aircraft | Airline mark, `ALT GROUND`, `GS 0KT` |
 | C04 | No route information | Airline mark, `---->----`, `ROUTE UNKNOWN` |
-| C05 | Only an inferred departure | Airline mark, `KATL?>----`, `INFERRED FROM` |
+| C05 | Only an inferred departure **(deferred)** | Airline mark, `KATL?>----`, `INFERRED FROM` |
 | C06 | No vertical rate or airspeed | Airline mark, `VS --FT/M`, `IAS --KT` |
 
 United's F02 also demonstrates true airspeed (`TAS 470KT`) and a received zero vertical rate. Southwest's F02 demonstrates a descent (`VS -1500FT/M`).
@@ -146,10 +150,15 @@ System pages replace the airline logo with a neutral icon and clear all prior ai
 | S02 | Initial or explicitly activated BLE setup | `SETUP VIA BLE` / `CONNECT TO WALL` / `SET WIFI + PI` | Leave after configuration or setup-window expiry |
 | S03 | ESP32 Wi-Fi disconnected | `WIFI LOST` / `RECONNECTING` / `CHECK ROUTER` | Bounded Wi-Fi retries; retain saved working settings |
 | S04 | Wi-Fi connected; Pi timeout, invalid response, or unavailable service | `PI UNAVAILABLE` / `WIFI CONNECTED` / `CHECK PI + PORT` | Retry the configured LAN endpoint |
-| S05 | Pi reachable; receiver snapshot missing, invalid, or stale | `RECEIVER STALE` / `CHECK READSB` / `NO LIVE DATA` | Wait for a fresh valid receiver snapshot |
+| S05 | Pi reachable; receiver stale or local snapshot/progress deadline elapsed | `RECEIVER STALE` / `CHECK READSB` / `NO LIVE DATA` | Wait for a fresh valid receiver snapshot |
 | S06 | Fresh healthy receiver; no eligible aircraft | `NO AIRCRAFT` / `IN YOUR AREA` / `RECEIVER OK` | Resume F01 when a fresh eligible aircraft appears |
+| S07 | `receiver.status=initializing`: startup, awaiting progress, clock recovery | `RECEIVER STARTING` / `AWAITING PROGRESS` / `NO LIVE DATA` | Wait for advancing source data |
+| S08 | `receiver.status=unavailable`: missing/unreadable input | `RECEIVER UNAVAILABLE` / `CHECK READSB PATH` / `NO LIVE DATA` | Restore configured local input |
+| S09 | `receiver.status=invalid`: malformed/time/size/row failure | `RECEIVER INVALID` / `CHECK READSB JSON` / `NO LIVE DATA` | Restore accepted receiver data |
+| S10 | Ready receiver, `selection.status=unconfigured` | `SET VIEW LOCATION` / `CHECK PI SETTINGS` / `NO VIEW CONFIG` | Configure the actual viewing location/filters |
+| S11 | Receiver ready, all retained aircraft locally expired | `AIRCRAFT EXPIRED` / `WAITING FOR FEED` / `NO LIVE DATA` | Wait for a newly valid candidate |
 
-After startup, evaluate active setup first, then Wi-Fi, Pi availability, receiver freshness, empty candidate set, and finally flight pages. An expired individual aircraft must be removed even while the receiver is healthy. Use the [M1 feed](../api/flights.md) receiver states and monotonic expiry rules, including the initial **5-second snapshot** and **15-second aircraft/position** thresholds. `initializing`, `stale`, `unavailable`, `invalid`, `clock_untrusted`, and `filter_unconfigured` cannot display flights; the last state requires a configuration message, not a healthy empty sky. Missing freshness cannot establish a live flight. Once a fresh feed returns, start the chosen aircraft on F01 rather than resuming an old route/details frame.
+After startup, evaluate active setup first, then Wi-Fi, Pi availability, receiver status/freshness, viewing configuration, candidate expiry/empty set, and finally flight pages. An expired individual aircraft must be removed even while the receiver is healthy. Use the [M1 feed](../api/flights.md) receiver states and monotonic expiry rules, including the initial **5-second snapshot** and **15-second aircraft/position** thresholds. `initializing`, `stale`, `unavailable`, and `invalid` cannot display flights. `selection.status=unconfigured` requires the configuration screen; a clock-confidence value of `uncertain` cannot establish a live card. Only a ready receiver, ready selection and empty accepted array qualify as healthy empty sky. Missing freshness cannot establish a live flight. Once a fresh feed returns, start the chosen aircraft on F01 rather than resuming an old route/details frame.
 
 BLE setup and connection recovery are **screen concepts**, not implemented provisioning/retry logic in this package. The static examples and demo are an inspection tool, not an emulation of receiver failures.
 
@@ -184,11 +193,11 @@ The display's 5×7 font itself is embedded as whole-pixel patterns. The exporter
 
 ## Review and implementation boundary
 
-Review the logo size/recognition, F01 information hierarchy, preferred no-departure option, desired optional pages, proposed dwell times, route labels, and clarity of S03–S06. The generated pack makes those choices concrete without requiring a physical panel.
+Review the logo size/recognition, F01 information hierarchy, preferred no-departure option, desired optional pages, proposed dwell times, route labels, and clarity of S03–S11. The generated pack makes those choices concrete without requiring a physical panel.
 
 After design review, firmware work needs nullable telemetry and freshness in `FlightInfo`, a real local Pi feed, actual RGB565 logo rendering/cache, the selected page/state machine, and simulator mapping that matches the full matrix. The current Wokwi configuration is only **64×32**; it cannot demonstrate the full 160×32 layout without a separate full-size fixture. No firmware build/flash or Pi deployment is part of this design package.
 
-Local verification checks all 34 native frame dimensions and text bounds; zero/unknown/ground semantics; signed vertical speed; IAS/TAS labels; route inference markers; no-departure style selection, sourced-destination preservation, registration/hex identity, distance/track labels, and missing-value fallbacks; gallery controls and deep links; download targets; mobile overflow; and absence of external browser requests. Real-panel acceptance still needs viewing-distance legibility, logo recognition, tiled pixel order, actual brightness, and live freshness/state transitions. Browser previews do not establish those hardware results.
+Local verification checks all 39 native frame dimensions and text bounds; zero/unknown/ground semantics; signed vertical speed; IAS/TAS labels; route inference markers; no-departure style selection, sourced-destination preservation, canonical identifier and registration details, distance/track labels, and missing-value fallbacks; gallery controls and deep links; download targets; mobile overflow; and absence of external browser requests. Real-panel acceptance still needs viewing-distance legibility, logo recognition, tiled pixel order, actual brightness, and live freshness/state transitions. Browser previews do not establish those hardware results.
 
 ## API integration boundary
 
@@ -197,7 +206,6 @@ M1 draft reserves `/v2/flights`, schema version 2. Screen fixture keys are a vie
 model (`design_fixture_version`), never a wire schema. For example, hex maps from
 `adsb_icao`, type from `aircraft.icao_type_designator`, IAS/TAS from
 `telemetry.airspeed_ias_kt`/`airspeed_tas_kt`, and VS is shown only when
-`telemetry.vertical_speed_source` is barometric. A geometric-only rate remains
-unknown on this page. Ground state comes from `telemetry.ground_state`.
+`telemetry.vertical_speed_source` is barometric. A geometric-only rate is labeled `GVS` on this page. Ground state comes from `telemetry.ground_state`.
 Operator artwork requires the exact approved operator/manifest association;
 these hand-drawn review emblems never become production assets automatically.

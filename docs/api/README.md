@@ -56,10 +56,10 @@ explains which keys identify an aircraft, airline, route and asset.
 
 - `schema_version=2` identifies the canonical flight-feed major version. It is unrelated to
   ADS-B `version`, VRS schema 1, the legacy metadata version or ESP32 settings version.
-- Draft revision 0.1 is documentation status, not a production capability claim.
-  The prototype's version number does not imply M1 conformance. Resolve the
-  explicit wire migration/version before freezing M1; advertise canonical
-  flights or logos only after their corresponding runtime exists.
+- Flight draft revision 0.2 (route/logo drafts 0.1) is documentation status, not a production capability claim.
+  The v1 prototype remains compatible; M2/M3 must explicitly adopt canonical
+  v2. Advertise canonical flights or logos only after their corresponding
+  runtime exists.
 - Producers emit documented keys and explicit nulls for unknown content. Schemas
   describe complete producer outputs and reject unexpected keys during checks.
   Consumers may ignore bounded unknown keys within a supported major version;

@@ -71,18 +71,23 @@ GLYPH_ROWS = {
 
 PAGE_INFO = {
     "overview": ("F01", "Flight overview", "Default: callsign and type, barometric altitude, ground speed."),
-    "motion": ("F02", "Motion details", "Signed barometric vertical rate; decoded IAS or TAS keeps its own label."),
-    "identity": ("F03", "Airline and airframe", "Operating airline, received callsign, aircraft type and registration."),
+    "motion": ("F02", "Motion details", "Barometric VS or geometric GVS; decoded IAS or TAS keeps its own label."),
+    "identity": ("F03", "Airline and airframe", "Resolved reference airline, canonical identifier, aircraft type and registration."),
     "route": ("F04", "Airport route", "Optional local route; its source stays visible."),
-    "cities": ("F05", "From / to cities", "Commercial-style city page, with reference/dated provenance.")
+    "cities": ("F05", "From / to airports", "Airport display codes with reference/dated provenance; no invented city names.")
 }
 STATE_NOTES = {
     "boot": "Before a usable feed is available. Do not imply that an empty receiver is still loading.",
     "setup": "Provisioning concept: Wi-Fi and Pi address/port. BLE implementation remains separate work.",
     "wifi": "ESP32 disconnected from Wi-Fi. Replace the flight card and retry using bounded backoff.",
     "pi": "Wi-Fi is connected, but the configured Pi service cannot be reached or its response is unusable.",
-    "receiver": "Pi is reachable, but the receiver snapshot is missing, invalid, or too old. Clear previous flight data.",
-    "empty": "Fresh, healthy receiver with zero eligible nearby aircraft. This is a normal state."
+    "receiver": "Pi is reachable, but the receiver snapshot or source progress is stale. Clear previous flight data.",
+    "empty": "Fresh, configured receiver with zero eligible nearby aircraft. This is a normal state.",
+    "initializing": "Receiver startup, awaiting progress, or clock recovery. Clear flights until source progress is established.",
+    "unavailable": "Pi reachable, but receiver input is missing or unreadable. Clear flight details.",
+    "invalid": "Pi reachable, but receiver JSON/time/size/row bounds are invalid. Clear flight details.",
+    "config": "Receiver ready, but viewing coordinates/filters are unconfigured. This is not an empty sky.",
+    "expired": "Receiver still fresh, but all retained aircraft have expired. Await a new live candidate."
 }
 
 
@@ -193,7 +198,7 @@ def metric(label, value, unit, signed=False):
 
 
 def identifier(flight):
-    return flight.get("callsign") or flight.get("registration") or "HEX " + flight["hex"]
+    return flight.get("display_identifier") or (flight.get("callsign") or "").strip() or flight["hex"]
 
 
 def header(flight):
@@ -221,37 +226,45 @@ def route_label(flight):
 def airport_token(airport):
     if not airport:
         return "----"
-    return fit(airport.get("icao") or "----", 4) + ("?" if airport.get("source") == "inferred" else "")
+    return fit(airport.get("code") or airport.get("icao") or "----", 4) + ("?" if airport.get("source") == "inferred" else "")
 
 
 def sourced_endpoint(endpoint):
-    return bool(endpoint and endpoint.get("icao") and endpoint.get("source") in {"manual", "observed", "inferred", "reference", "dated_override"})
+    return bool(endpoint and (endpoint.get("code") or endpoint.get("icao")) and endpoint.get("source") in {"manual", "observed", "inferred", "reference", "dated_override"})
 
 
-def canonical_view(flight):
-    """Project a validated v2 candidate into review fields; no HTTP or freshness logic.
+def canonical_view(flight, elapsed_ms=0):
+    """Project a validated v2 candidate; elapsed is from its original request start.
 
-    The caller must expire the candidate and dated/operator associations first.
-    Cities are absent from M1; use supplied display codes rather than invent them.
+    Used after receiver/candidate expiry checks in canonical_display. No HTTP,
+    firmware cache, asset validation, or invented city/observed-event data.
     """
+    if elapsed_ms < 0:
+        raise ValueError("Elapsed request time cannot be negative")
     telemetry, aircraft, operator = flight["telemetry"], flight["aircraft"], flight["operator"]
+    operator_active = operator["valid_for_ms"] is None or operator["valid_for_ms"] > elapsed_ms
+    logo = flight["logo"] if operator_active else None
+    if logo and logo["operator_id"] != operator["id"]:
+        logo = None
     view = {
-        "hex": flight["adsb_icao"], "callsign": flight["display_identifier"],
+        "hex": flight["adsb_icao"], "callsign": (flight["callsign_received"] or "").strip() or None,
+        "display_identifier": flight["display_identifier"],
         "registration": aircraft["registration"], "aircraft_type": aircraft["icao_type_designator"],
-        "aircraft_model": aircraft["model"], "operator_icao": operator["icao"],
-        "airline_short": operator["name"],
+        "aircraft_model": aircraft["model"], "operator_icao": operator["icao"] if operator_active else None,
+        "airline_short": operator["name"] if operator_active else None, "logo": logo,
         "altitude_baro_ft": "ground" if telemetry["ground_state"] == "ground" else telemetry["altitude_baro_ft"],
         "ground_speed_kt": telemetry["ground_speed_kt"],
         "vertical_rate_baro_fpm": telemetry["vertical_speed_fpm"] if telemetry["vertical_speed_source"] == "barometric" else None,
+        "vertical_rate_geom_fpm": telemetry["vertical_speed_fpm"] if telemetry["vertical_speed_source"] == "geometric" else None,
         "indicated_airspeed_kt": telemetry["airspeed_ias_kt"], "true_airspeed_kt": telemetry["airspeed_tas_kt"],
         "distance_km": flight["position"]["distance_km"], "ground_track_deg": telemetry["ground_track_deg"],
         "origin": None, "destination": None,
     }
     preferred = flight["preferred_route"]
     route = flight.get(preferred) if preferred in {"route_reference", "route_override"} else None
+    if route and preferred == "route_override" and route["remaining_validity_ms"] <= elapsed_ms:
+        preferred, route = "route_reference", flight["route_reference"]
     if route:
-        if preferred == "route_override" and route["remaining_validity_ms"] <= 0:
-            return view
         if route["current_leg_ambiguous"]:
             view["route_status"] = "MULTI-STOP ROUTE"
             return view
@@ -259,9 +272,49 @@ def canonical_view(flight):
         for target, field in (("origin", "departure"), ("destination", "destination")):
             code = route[field + "_airport"]
             if code:
-                view[target] = {"icao": code, "city": route[field + "_display_code"] or code, "source": source}
+                view[target] = {"code": code, "display_code": route[field + "_display_code"] or code, "source": source}
         view["route_status"] = "REFERENCE ROUTE" if source == "reference" else "VERIFIED ROUTE" if route["flight_instance_verified"] else "DATED ROUTE"
     return view
+
+
+def canonical_display(envelope, elapsed_ms=0, *, setup_active=False, wifi_connected=True, pi_available=True):
+    """Map a validated v2 envelope to a state or still-live views for design review.
+
+    The consumer retains the original request-start baseline for repeated
+    instance/sequence responses. This helper does not implement that cache.
+    """
+    if elapsed_ms < 0:
+        raise ValueError("Elapsed request time cannot be negative")
+    def state(key):
+        return {"state": key, "flights": []}
+    if setup_active:
+        return state("setup")
+    if not wifi_connected:
+        return state("wifi")
+    if not pi_available or envelope is None or envelope.get("schema_version") != 2:
+        return state("pi")
+    receiver = envelope["receiver"]
+    states = {"initializing": "initializing", "stale": "receiver", "unavailable": "unavailable", "invalid": "invalid"}
+    if receiver["status"] in states:
+        return state(states[receiver["status"]])
+    if receiver["status"] != "ready":
+        return state("pi")
+    if receiver["clock_confidence"] == "uncertain":
+        return state("initializing")
+    for field in ("snapshot_age_ms", "progress_age_ms"):
+        age = receiver[field]
+        if age is None or age + elapsed_ms >= 5000:
+            return state("receiver")
+    if envelope["selection"]["status"] == "unconfigured":
+        return state("config")
+    if not envelope["flights"]:
+        return state("empty")
+    live = [row for row in envelope["flights"]
+            if row["last_seen_age_ms"] + elapsed_ms < 15000
+            and row["position_seen_age_ms"] + elapsed_ms < 15000]
+    if not live:
+        return state("expired")
+    return {"state": None, "flights": [canonical_view(row, elapsed_ms) for row in live]}
 
 
 def departure_fallback(flight, mode="telemetry", keep_destination=True):
@@ -288,20 +341,26 @@ def flight_lines(flight, page):
     if page == "motion":
         ias, tas = flight.get("indicated_airspeed_kt"), flight.get("true_airspeed_kt")
         airspeed = metric("IAS", ias, "KT") if ias is not None or tas is None else metric("TAS", tas, "KT")
-        return [header(flight), metric("VS", flight.get("vertical_rate_baro_fpm"), "FT/M", signed=True), airspeed]
+        rate = metric("VS", flight.get("vertical_rate_baro_fpm"), "FT/M", signed=True)
+        if flight.get("vertical_rate_baro_fpm") is None and flight.get("vertical_rate_geom_fpm") is not None:
+            rate = metric("GVS", flight["vertical_rate_geom_fpm"], "FT/M", signed=True)
+        return [header(flight), rate, airspeed]
     if page == "identity":
+        detail = (flight.get("aircraft_type") or "TYPE --") + " " + (flight.get("registration") or "REG --")
+        if len(detail) > 20:
+            detail = "REG " + flight["registration"]
         return [flight.get("airline_short") or flight.get("operator_icao") or "UNKNOWN OPERATOR",
-                identifier(flight), (flight.get("aircraft_type") or "TYPE --") + " " + (flight.get("registration") or "REG --")]
+                identifier(flight), detail]
     if page == "route":
         return [header(flight), airport_token(flight.get("origin")) + ">" + airport_token(flight.get("destination")), route_label(flight)]
     if page == "cities":
         origin, destination = flight.get("origin"), flight.get("destination")
         def city(airport):
-            return ((airport.get("city") or airport.get("icao") or "--") +
+            return ((airport.get("display_code") or airport.get("code") or airport.get("icao") or "--") +
                     ("?" if airport.get("source") == "inferred" else "")) if airport else "--"
         return ["FROM " + city(origin), "TO " + city(destination), route_label(flight)]
     if page == "airframe":
-        return [identifier(flight), flight.get("aircraft_model") or flight.get("aircraft_type") or "TYPE --", "HEX " + flight["hex"]]
+        return [flight.get("registration") or identifier(flight), flight.get("aircraft_model") or flight.get("aircraft_type") or "TYPE --", "HEX " + flight["hex"]]
     if page == "nearby":
         distance, track = flight.get("distance_km"), flight.get("ground_track_deg")
         return [header(flight), "DIST --KM" if distance is None else f"DIST {distance:.1f}KM",
@@ -411,14 +470,14 @@ def build_scenes(fixtures):
             native, lines = render(flight_lines(f, page), airline_logo(f["operator_icao"]), colors)
             scenes.append({"id": f"{page}-{key}", "code": code, "title": title,
                            "group": "flight", "airline": key, "page": page, "lines": lines,
-                           "note": note, "caption": "Optional local route" if page in ("route", "cities") else f["callsign"] + " / " + f["aircraft_type"],
+                           "note": note, "caption": "Reference route / not dated verification" if page in ("route", "cities") else f["callsign"] + " / " + f["aircraft_type"],
                            "image": native})
     cases = [
-        ("partial", "overview", "C01", "Unknown airline / partial data", "Operator-code badge; missing altitude and type stay unknown."),
+        ("partial", "overview", "C01", "Unknown airline / partial data", "Neutral AIR badge; an unrecognized callsign prefix does not resolve an airline."),
         ("anonymous", "overview", "C02", "No callsign / zero speed", "Hex identity is usable; received zero is displayed as zero."),
         ("ground", "overview", "C03", "Aircraft on the ground", "Ground is a state, never coerced into an altitude of zero."),
         ("no_route", "route", "C04", "Route unavailable", "Ordinary ADS-B does not include the itinerary. Do not invent it."),
-        ("inferred_route", "route", "C05", "Departure inferred", "A question mark and explicit source label distinguish an inference."),
+        ("inferred_route", "route", "C05", "Departure inferred", "Deferred future concept: no inferred-departure field exists in M1; excluded from canonical projection."),
         ("no_route", "motion", "C06", "Airspeed / vertical rate absent", "GS is not substituted for IAS/TAS; missing readings remain unknown.")
     ]
     for key, page, code, title, note in cases:
@@ -426,7 +485,7 @@ def build_scenes(fixtures):
         colors = ["white", "amber" if key == "inferred_route" else "cyan", "amber" if page == "route" else "cyan"]
         native, lines = render(flight_lines(f, page), airline_logo(f.get("operator_icao")), colors)
         scenes.append({"id": f"case-{key}", "code": code, "title": title, "group": "case", "airline": "delta" if key in ("ground", "no_route", "inferred_route") else None,
-                       "page": page, "lines": lines, "note": note, "caption": "Unknown values stay explicit" if key != "ground" else "ALT GROUND / GS 0KT", "image": native})
+                       "deferred": bool(f.get("deferred")), "page": page, "lines": lines, "note": note, "caption": "Unknown values stay explicit" if key != "ground" else "ALT GROUND / GS 0KT", "image": native})
     # The same no-route flight appears in two distinct cases; include the page in its ID.
     scenes[-1]["id"] = "case-missing-motion"
     departure_options = [
@@ -435,7 +494,7 @@ def build_scenes(fixtures):
         ("no-departure-nearby", "private_piston", "nearby", "N03", "Nearby distance + track", "Optional position page: horizontal distance from the confirmed receiver/home location and decoded ground track. Neither identifies departure.", "Fresh position / local telemetry"),
         ("no-departure-explicit", "private_piston", "departure-unknown", "N04", "Departure unavailable", "Optional explicit treatment: FROM UNKNOWN with the aircraft identity and useful altitude, instead of an empty airport route.", "Missing departure is a normal flight state"),
         ("no-departure-business-jet", "private_jet", "overview", "N01", "Business jet + telemetry", "The same recommended layout works for a private jet. Use a neutral aircraft icon when no operating airline is known.", "N456CJ / Citation CJ3"),
-        ("no-departure-destination", "destination_only", "destination-only", "N05", "Known destination only", "Keep a separately sourced destination while leaving departure unknown. This example has a manual destination and retains the known airline logo.", "Unknown departure / manually supplied destination"),
+        ("no-departure-destination", "destination_only", "destination-only", "N05", "Known destination only", "Deferred future concept: M1 has no independently planned destination field. Never map this to an observed arrival.", "Unknown departure / manually supplied destination"),
         ("no-departure-unidentified", "unidentified_overhead", "overview", "N01", "Unidentified aircraft", "A received hex address and telemetry remain useful when callsign, registration, type, operator, and departure are all unknown.", "HEX AD56EF / no guessed identity")
     ]
     for scene_id, key, page, code, title, note, caption in departure_options:
@@ -444,11 +503,15 @@ def build_scenes(fixtures):
         colors = ["white", "muted" if page == "departure-unknown" else "cyan", "amber" if page == "destination-only" else "muted" if page == "airframe" else "cyan"]
         native, lines = render(flight_lines(f, page), emblem, colors)
         scenes.append({"id": scene_id, "code": code, "title": title, "group": "departure", "airline": "united" if key == "destination_only" else None,
-                       "page": page, "lines": lines, "note": note, "caption": caption, "image": native})
+                       "deferred": bool(f.get("deferred")), "page": page, "lines": lines, "note": note, "caption": caption, "image": native})
     for i, (key, state) in enumerate(fixtures["states"].items(), 1):
         native, lines = render(state["lines"], status_icon(state["icon"], COLORS[state["accent"]]), [state["accent"], "white", "muted"])
         scenes.append({"id": f"state-{key}", "code": f"S{i:02}", "title": state["title"].title(), "group": "state", "airline": None,
                        "page": key, "lines": lines, "note": STATE_NOTES[key], "caption": "Status replaces stale flight data", "image": native})
+    for scene in scenes:
+        if scene.get("deferred"):
+            scene["caption"] = "Future concept / excluded from M1"
+            scene["title"] += " (future)"
     return scenes
 
 
@@ -474,7 +537,7 @@ def validate(fixtures, scenes):
     f["altitude_baro_ft"] = "ground"
     assert flight_lines(f, "overview")[1] == "ALT GROUND"
     f["callsign"], f["registration"] = None, None
-    assert identifier(f) == "HEX A4B5C6"
+    assert identifier(f) == "A4B5C6"
     assert "?" in flight_lines(fixtures["flights"]["inferred_route"], "route")[1]
     assert "--" in flight_lines(fixtures["flights"]["no_route"], "route")[1]
     # Exercise signed telemetry and long labels without relying on only the examples.
@@ -482,12 +545,12 @@ def validate(fixtures, scenes):
         assert metric("VS", value, "FT/M", True) == expected
     assert fit("A VERY LONG AIRLINE NAME") == "A VERY LONG AIRLI..."
     private = fixtures["flights"]["private_piston"]
-    assert identifier(private) == "N123AB"
+    assert identifier(private) == "AB12CD"
     assert departure_fallback(private) == "overview"
     assert departure_fallback(private, "identity") == "airframe"
     assert departure_fallback(private, "nearby") == "nearby"
     assert departure_fallback(private, "explicit") == "departure-unknown"
-    assert flight_lines(private, "nearby") == ["N123AB C172", "DIST 1.8KM", "TRK 090DEG"]
+    assert flight_lines(private, "nearby") == ["AB12CD C172", "DIST 1.8KM", "TRK 090DEG"]
     unknown = fixtures["flights"]["unidentified_overhead"]
     assert departure_fallback(unknown, "nearby") == "overview"
     assert departure_fallback(unknown, "identity") == "overview"

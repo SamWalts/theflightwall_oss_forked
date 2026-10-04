@@ -10,7 +10,7 @@
    data source, protocol, or release requirement.
    For M1/M2/M3/M6, read the [contract index](docs/api/README.md), relevant schema,
    [shared examples](tests/fixtures/m1/README.md) and [join rules](docs/api/enrichment-joins.md).
-   Draft 0.1 is checked documentation. The implemented prototype feed/parser
+   Flight draft 0.2 and route/logo drafts 0.1 are checked documentation. The implemented prototype feed/parser
    follows [the initial local API](docs/local-flight-api.md), not this draft.
 4. Run `git status --short --branch` and preserve unrelated user changes.
 5. Use [CONTRIBUTING.md](CONTRIBUTING.md) for setup and validation commands.
