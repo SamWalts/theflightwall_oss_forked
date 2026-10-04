@@ -2,5 +2,6 @@ misc
 .DS_Store
 .venv
 firmware/.pio
+docs/examples/wiring-test/.pio/
 __pycache__/
 *.pyc
