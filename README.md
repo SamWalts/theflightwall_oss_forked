@@ -7,7 +7,11 @@ This is the open source version with some basic guides to the panels, mounting t
 **Don't feel like building one? Check out the offical product: [theflightwall.com](https://theflightwall.com)**
 
 ![Main Image](images/main-image.png)
-*Airline logo metadata from AeroAPI is now integrated into the firmware display path.*
+*Airline logo metadata from AeroAPI is now integrated into the firmware display path; the current renderer shows an operator-code badge.*
+
+## New screen designs for review
+
+The [screen review package](docs/screens/README.md) proposes five flight pages with airline emblems, [no-departure options for private and unidentified aircraft](docs/screens/mockups/no-departure-options.png), six system states, and partial-data fallbacks for the 160×32 wall. Open the [interactive mockups](docs/screens/review.html) or [review PDF](docs/screens/flightwall-screen-review.pdf). These are design artifacts; firmware integration is separate.
 
 # Component List
 - Main components

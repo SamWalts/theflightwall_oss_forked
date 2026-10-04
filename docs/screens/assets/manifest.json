@@ -1,0 +1,59 @@
+{
+  "purpose": "Design-review pixel interpretations only; production asset approval is not established.",
+  "assets": [
+    {
+      "operator_icao": "DAL",
+      "name": "Delta widget",
+      "file": "dal-24.png",
+      "width": 24,
+      "height": 24,
+      "format": "RGB PNG",
+      "background": "black",
+      "reference_url": "https://www.delta.com/",
+      "source": "Original hand-drawn pixel interpretation in render_mockups.py",
+      "source_license": null,
+      "attribution": "Brand identity belongs to the named airline.",
+      "production_approved": false,
+      "version": "review-1",
+      "date": "2026-10-03",
+      "modifications": "Simplified to a 24x24 emblem for legibility on the LED wall.",
+      "sha256": "15d67e7174de7e11bf21ffb0223e5a51cefe89d699c16fcd6c0fab25f6dcc0aa"
+    },
+    {
+      "operator_icao": "UAL",
+      "name": "United globe",
+      "file": "ual-24.png",
+      "width": 24,
+      "height": 24,
+      "format": "RGB PNG",
+      "background": "black",
+      "reference_url": "https://www.united.com/",
+      "source": "Original hand-drawn pixel interpretation in render_mockups.py",
+      "source_license": null,
+      "attribution": "Brand identity belongs to the named airline.",
+      "production_approved": false,
+      "version": "review-1",
+      "date": "2026-10-03",
+      "modifications": "Simplified to a 24x24 emblem for legibility on the LED wall.",
+      "sha256": "f86eabf4db488cf74c2b8453317c4f0d7e022bbb47d9c558193bbb46b9793f57"
+    },
+    {
+      "operator_icao": "SWA",
+      "name": "Southwest heart",
+      "file": "swa-24.png",
+      "width": 24,
+      "height": 24,
+      "format": "RGB PNG",
+      "background": "black",
+      "reference_url": "https://www.southwest.com/",
+      "source": "Original hand-drawn pixel interpretation in render_mockups.py",
+      "source_license": null,
+      "attribution": "Brand identity belongs to the named airline.",
+      "production_approved": false,
+      "version": "review-1",
+      "date": "2026-10-03",
+      "modifications": "Simplified to a 24x24 emblem for legibility on the LED wall.",
+      "sha256": "ac8240723fa5766561073312f491994485d4dc373f215a62ffc1362109543601"
+    }
+  ]
+}
