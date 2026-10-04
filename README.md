@@ -2,12 +2,27 @@
 
 TheFlightWall is an LED wall which shows live information of flights going by your window.
 
+The planned migration to a local readsb → Pi → ESP32 system is documented in
+[architecture.md](architecture.md). Follow the [implementation checklist](docs/implementation-plan.md)
+and [development guide](CONTRIBUTING.md); AI contributors should start with
+[AGENTS.md](AGENTS.md) and [project context](docs/project-context.md). The software
+setup below describes the current cloud-based firmware, not the completed migration.
+See [route lookup research](docs/route-detection.md) for free callsign-to-airport
+reference data suitable for overhead flights and Google/manual verification.
+The Pi now implements [offline route import and lookup](pi_enrichment/README.md#offline-departuredestination-lookup)
+with streamed SQLite storage; its [route contract](docs/api/routes.md) distinguishes
+reference routes from dated flight verification.
+The [M1 contract draft](docs/api/README.md) now documents the Pi-to-ESP32 feed,
+logo assets and diagnostics. See the [ADS-B receiver inventory](docs/adsb-receiver-data.md)
+and [enrichment joins](docs/api/enrichment-joins.md) for how telemetry becomes
+aircraft details, airline logos and likely departure/destination pairs.
+
 This is the open source version with some basic guides to the panels, mounting them together, data services, and code. Check out our viral build video: [https://www.instagram.com/p/DLIbAtbJxPl](https://www.instagram.com/p/DLIbAtbJxPl)
 
 **Don't feel like building one? Check out the offical product: [theflightwall.com](https://theflightwall.com)**
 
 ![Main Image](images/main-image.png)
-*Airline logo lookup will be added soon!*
+*Airline logo metadata from AeroAPI is now integrated into the firmware display path.*
 
 # Component List
 - Main components
@@ -54,6 +69,11 @@ The entire panel is controlled by one data line - simple electronics in exchange
 The data for this project consists of two main data sources:
 1. Core public [ADS-B](https://en.wikipedia.org/wiki/Automatic_Dependent_Surveillance%E2%80%93Broadcast) data for flight positions and callsigns - using [OpenSky](https://opensky-network.org)
 2. Flight information lookup - aircraft, airline, and route (origin/destination airport). This is typically the hardest / most expensive information to find. Using [FlightAware AeroAPI](https://flightaware.com/aeroapi)
+
+Optional local enrichment:
+- Run the Raspberry Pi FAA enrichment API to map ADS-B ICAO (`hex`) to operator and model data.
+- See [pi_enrichment/README.md](pi_enrichment/README.md) for API contract, FAA sync pipeline, and systemd setup.
+- For one-machine Docker testing of both Pi enrichment and a FlightWall simulator, see [docker/README.md](docker/README.md).
 
 ### Setting up OpenSky
 1. Register for an [OpenSky](https://opensky-network.org/) account
@@ -126,6 +146,22 @@ Useful options:
 - `--interval-seconds 60` to control polling frequency
 - `--run-once` to fetch one row and exit
 - `--timeout-seconds 30` to control HTTP timeouts
+
+### Mock the display with Wokwi (macOS + VS Code)
+
+You can run a mock LED display without hardware using Wokwi:
+
+1. Open `firmware/` in VS Code.
+2. Build the `wokwi` PlatformIO environment.
+3. Start the simulator (Wokwi extension) from VS Code, or run locally:
+   - `cd firmware`
+   - `pio run -e wokwi`
+   - `wokwi-cli --interactive .`
+4. In serial monitor, use simple commands:
+   - `help`, `demo`, `stop`
+   - `flight 0`
+   - `msg HELLO`
+   - `load`, `clear`
 
 ### Customization
 

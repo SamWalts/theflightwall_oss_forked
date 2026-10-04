@@ -1,0 +1,133 @@
+{
+  "note": "Small reference lookup examples, not a complete SQL import generation. All aircraft/evidence/asset data is synthetic. BAW117 and KAP48B ordered routes follow the pinned VRS examples; BAW3YA and XY alias collisions are synthetic.",
+  "revision": "d856ef1ed0fc492e8a3933ff4a938448ed008f66",
+  "airlines": [
+    {
+      "code": "BAW",
+      "name": "British Airways",
+      "icao": "BAW",
+      "iata": "BA"
+    },
+    {
+      "code": "EZY",
+      "name": "easyJet",
+      "icao": "EZY",
+      "iata": "U2"
+    },
+    {
+      "code": "ABC",
+      "name": "SYNTHETIC ALIAS ONE",
+      "icao": "ABC",
+      "iata": "XY"
+    },
+    {
+      "code": "DEF",
+      "name": "SYNTHETIC ALIAS TWO",
+      "icao": "DEF",
+      "iata": "XY"
+    }
+  ],
+  "routes": [
+    {
+      "callsign": "BAW117",
+      "airline_code": "BAW",
+      "airport_codes": [
+        "EGLL",
+        "KJFK"
+      ],
+      "synthetic": false
+    },
+    {
+      "callsign": "BAW3YA",
+      "airline_code": "BAW",
+      "airport_codes": [
+        "EGLL",
+        "KJFK",
+        "KLAX"
+      ],
+      "synthetic": true
+    },
+    {
+      "callsign": "KAP48B",
+      "airline_code": "KAP",
+      "airport_codes": [
+        "TJSJ",
+        "TJCP",
+        "TJSJ",
+        "TJCP",
+        "TJSJ",
+        "TJCP",
+        "TJSJ",
+        "TJCP",
+        "TJSJ",
+        "TJCP",
+        "TJSJ"
+      ],
+      "synthetic": false
+    }
+  ],
+  "aircraft": [
+    {
+      "hex": "A1B2C3",
+      "registration": "TEST-REG",
+      "registered_owner": "EXAMPLE OWNER",
+      "manufacturer": "EXAMPLE MAKER",
+      "model": "EXAMPLE MODEL",
+      "icao_type_designator": "B77W",
+      "faa_classification": "4",
+      "sources": {
+        "registration": "fixture",
+        "registered_owner": "fixture",
+        "manufacturer": "fixture",
+        "model": "fixture",
+        "icao_type_designator": "fixture",
+        "faa_classification": "fixture"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "operator_id": "airline:BAW",
+      "descriptor": {
+        "operator_id": "airline:BAW",
+        "source_id": "logos",
+        "path": "/assets/logos/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.rgb565",
+        "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "width": 24,
+        "height": 24,
+        "format": "rgb565",
+        "byte_order": "big_endian",
+        "size_bytes": 1152
+      },
+      "synthetic": true,
+      "approved_artwork": false
+    }
+  ],
+  "overrides": [
+    {
+      "source_id": "local",
+      "matched_callsign": "BAW117",
+      "airport_codes": [
+        "EGLL",
+        "KJFK"
+      ],
+      "stop_count": 2,
+      "sequence_omitted": false,
+      "departure_airport": "EGLL",
+      "destination_airport": "KJFK",
+      "departure_display_code": "LHR",
+      "destination_display_code": "JFK",
+      "current_leg_ambiguous": false,
+      "flight_instance_verified": true,
+      "kind": "dated_override",
+      "source_label": "synthetic_manual_check",
+      "flight_date": "2026-10-03",
+      "valid_from": "2026-10-03T21:00:00.000Z",
+      "valid_until": "2026-10-03T23:00:00.000Z",
+      "remaining_validity_ms": 3599900,
+      "aircraft_hex": "A1B2C3",
+      "evidence_excerpt": "Synthetic evidence for contract shape only; no actual flight was verified.",
+      "evidence_truncated": false
+    }
+  ]
+}

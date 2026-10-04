@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:flightwall:schema:logo:1",
+  "title": "FlightWall logo descriptor v1 — M1 draft 0.1",
+  "description": "Proposed M6 descriptor for an approved local asset. No logo importer, asset server, or firmware cache is implemented by this schema.",
+  "type": "object",
+  "properties": {
+    "operator_id": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 16,
+      "pattern": "^airline:[A-Z0-9]{2,3}(?![\\s\\S])"
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 8,
+      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^/assets/logos/[a-f0-9]{64}\\.rgb565(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[a-f0-9]{64}(?![\\s\\S])"
+    },
+    "width": {
+      "const": 24
+    },
+    "height": {
+      "const": 24
+    },
+    "format": {
+      "const": "rgb565"
+    },
+    "byte_order": {
+      "const": "big_endian"
+    },
+    "size_bytes": {
+      "const": 1152
+    }
+  },
+  "required": [
+    "operator_id",
+    "source_id",
+    "path",
+    "sha256",
+    "width",
+    "height",
+    "format",
+    "byte_order",
+    "size_bytes"
+  ],
+  "additionalProperties": false
+}

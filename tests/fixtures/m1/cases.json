@@ -1,0 +1,365 @@
+{
+  "draft_revision": "0.1",
+  "cases": [
+    {
+      "name": "complete",
+      "contract": "flights",
+      "file": "envelopes/complete.json",
+      "receiver_input": "receiver/complete.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Synthetic telemetry, registry and logo metadata; BAW117 reference airport pair is from the pinned VRS example."
+    },
+    {
+      "name": "partial",
+      "contract": "flights",
+      "file": "envelopes/partial.json",
+      "receiver_input": "receiver/partial.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Missing optional telemetry/registry/artwork preserves the eligible position and route."
+    },
+    {
+      "name": "no-callsign",
+      "contract": "flights",
+      "file": "envelopes/no-callsign.json",
+      "receiver_input": "receiver/no-callsign.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": ""
+    },
+    {
+      "name": "unknown-references",
+      "contract": "flights",
+      "file": "envelopes/unknown-references.json",
+      "receiver_input": "receiver/unknown-references.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "No lookup data: use received identifier and telemetry."
+    },
+    {
+      "name": "ground-and-zero",
+      "contract": "flights",
+      "file": "envelopes/ground-and-zero.json",
+      "receiver_input": "receiver/ground-and-zero.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Explicit ground marker; valid zero metrics are preserved. This fixture enables ground inclusion."
+    },
+    {
+      "name": "zero-coordinates",
+      "contract": "flights",
+      "file": "envelopes/zero-coordinates.json",
+      "receiver_input": "receiver/zero-coordinates.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Zero latitude/longitude is valid. Coincident receiver bearing is unknown."
+    },
+    {
+      "name": "healthy-empty",
+      "contract": "flights",
+      "file": "envelopes/healthy-empty.json",
+      "receiver_input": "receiver/healthy-empty.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": ""
+    },
+    {
+      "name": "filter-unconfigured",
+      "contract": "flights",
+      "file": "envelopes/filter-unconfigured.json",
+      "receiver_input": "receiver/filter-unconfigured.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Receiver progress is healthy, but the installation center has not been set."
+    },
+    {
+      "name": "expired-position",
+      "contract": "flights",
+      "file": "envelopes/expired-position.json",
+      "receiver_input": "receiver/expired-position.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": ""
+    },
+    {
+      "name": "expired-aircraft",
+      "contract": "flights",
+      "file": "envelopes/expired-aircraft.json",
+      "receiver_input": "receiver/expired-aircraft.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": ""
+    },
+    {
+      "name": "multi-stop",
+      "contract": "flights",
+      "file": "envelopes/multi-stop.json",
+      "receiver_input": "receiver/multi-stop.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Synthetic three-stop example: no current-leg endpoint is asserted."
+    },
+    {
+      "name": "long-route",
+      "contract": "flights",
+      "file": "envelopes/long-route.json",
+      "receiver_input": "receiver/long-route.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Pinned VRS KAP48B has eleven stops. Compact output omits the whole sequence and leaves leg endpoints unknown. This partial example has no operator match."
+    },
+    {
+      "name": "ambiguous-alias",
+      "contract": "flights",
+      "file": "envelopes/ambiguous-alias.json",
+      "receiver_input": "receiver/ambiguous-alias.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Synthetic XY alias maps to two airline codes; no operator or route is chosen."
+    },
+    {
+      "name": "dated-override",
+      "contract": "flights",
+      "file": "envelopes/dated-override.json",
+      "receiver_input": "receiver/dated-override.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Synthetic scoped/date-window evidence for schema examples only. No real flight was manually verified."
+    },
+    {
+      "name": "offline-clock",
+      "contract": "flights",
+      "file": "envelopes/offline-clock.json",
+      "receiver_input": "receiver/offline-clock.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Relative freshness works without trusted UTC; dated overrides cannot activate."
+    },
+    {
+      "name": "initializing",
+      "contract": "flights",
+      "file": "envelopes/initializing.json",
+      "receiver_input": "receiver/initializing.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "First snapshot has not yet established source progress."
+    },
+    {
+      "name": "source-missing",
+      "contract": "flights",
+      "file": "envelopes/source-missing.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "No readable receiver input."
+    },
+    {
+      "name": "invalid-source",
+      "contract": "flights",
+      "file": "envelopes/invalid-source.json",
+      "receiver_input": "receiver/invalid-source.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": ""
+    },
+    {
+      "name": "clock-future",
+      "contract": "flights",
+      "file": "envelopes/clock-future.json",
+      "receiver_input": "receiver/clock-future.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Clock discontinuity forces freshness initialization and removes cards."
+    },
+    {
+      "name": "clock-backward",
+      "contract": "flights",
+      "file": "envelopes/clock-backward.json",
+      "receiver_input": "receiver/clock-backward.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Clock discontinuity forces freshness initialization and removes cards."
+    },
+    {
+      "name": "frozen-source",
+      "contract": "flights",
+      "file": "envelopes/frozen-source.json",
+      "receiver_input": "receiver/frozen-source.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Successful reads of unchanged source time do not revive the original snapshot."
+    },
+    {
+      "name": "old-snapshot",
+      "contract": "flights",
+      "file": "envelopes/old-snapshot.json",
+      "receiver_input": "receiver/old-snapshot.json",
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": ""
+    },
+    {
+      "name": "source-byte-limit",
+      "contract": "flights",
+      "file": "envelopes/source-byte-limit.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Generator describes a 4 MiB + 1 byte input; no multi-megabyte fixture is stored."
+    },
+    {
+      "name": "source-row-limit",
+      "contract": "flights",
+      "file": "envelopes/source-row-limit.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Generate 513 decoder rows to exceed the draft 512-row input limit."
+    },
+    {
+      "name": "invalid-body-byte-limit",
+      "contract": "flights",
+      "file": "envelopes/invalid-body-byte-limit.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "bytes",
+      "note": "Each field is schema-valid, but the serialized complete body exceeds 16,384 bytes."
+    },
+    {
+      "name": "byte-budget-prefix",
+      "contract": "flights",
+      "file": "envelopes/byte-budget-prefix.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Complete nearest prefix after byte limiting. Preserve eligible_count=8 and do not slice objects or fabricate unknown reference values."
+    },
+    {
+      "name": "candidate-cap",
+      "contract": "flights",
+      "file": "envelopes/candidate-cap.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "At most eight candidates; report both count and byte limits when applicable."
+    },
+    {
+      "name": "invalid-version",
+      "contract": "flights",
+      "file": "envelopes/invalid-version.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-address",
+      "contract": "flights",
+      "file": "envelopes/invalid-address.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-required-envelope",
+      "contract": "flights",
+      "file": "envelopes/invalid-required-envelope.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-speed-type",
+      "contract": "flights",
+      "file": "envelopes/invalid-speed-type.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-reference-verification",
+      "contract": "flights",
+      "file": "envelopes/invalid-reference-verification.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-route-leg",
+      "contract": "flights",
+      "file": "envelopes/invalid-route-leg.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-returned-count",
+      "contract": "flights",
+      "file": "envelopes/invalid-returned-count.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "semantics",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-source-id",
+      "contract": "flights",
+      "file": "envelopes/invalid-source-id.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "semantics",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-logo-hash-path",
+      "contract": "flights",
+      "file": "envelopes/invalid-logo-hash-path.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "semantics",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "invalid-logo-operator",
+      "contract": "flights",
+      "file": "envelopes/invalid-logo-operator.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "semantics",
+      "note": "Intentional invalid producer example; consumers apply the rejection/degradation rules in the flight contract."
+    },
+    {
+      "name": "diagnostic-reference",
+      "contract": "routes",
+      "file": "routes/diagnostic-reference.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Existing /v1/routes diagnostic response shape; timestamps are synthetic."
+    },
+    {
+      "name": "logo-descriptor",
+      "contract": "logo",
+      "file": "logos/descriptor.json",
+      "receiver_input": null,
+      "expected_valid": true,
+      "expected_failure": null,
+      "note": "Placeholder descriptor only. No bitmap with this hash exists or has been approved."
+    },
+    {
+      "name": "invalid-control-character",
+      "contract": "flights",
+      "file": "envelopes/invalid-control-character.json",
+      "receiver_input": null,
+      "expected_valid": false,
+      "expected_failure": "schema",
+      "note": "Trailing newline fits the length limit but is not a printable radio callsign; producer must emit unknown rather than control characters."
+    }
+  ]
+}

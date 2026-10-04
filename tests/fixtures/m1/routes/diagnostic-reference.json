@@ -1,0 +1,45 @@
+{
+  "callsign_received": "BAW117  ",
+  "normalized_callsign": "BAW117",
+  "route_reference": {
+    "airport_codes": [
+      "EGLL",
+      "KJFK"
+    ],
+    "airports": [
+      {
+        "code": "EGLL",
+        "name": "London Heathrow Airport",
+        "name_truncated": false,
+        "icao": "EGLL",
+        "iata": "LHR",
+        "latitude": 51.4706,
+        "longitude": -0.461941
+      },
+      {
+        "code": "KJFK",
+        "name": "John F Kennedy International Airport",
+        "name_truncated": false,
+        "icao": "KJFK",
+        "iata": "JFK",
+        "latitude": 40.639801,
+        "longitude": -73.7789
+      }
+    ],
+    "departure_airport": "EGLL",
+    "destination_airport": "KJFK",
+    "current_leg_ambiguous": false,
+    "airport_details_omitted": false,
+    "kind": "reference",
+    "source": "vrs_standing_data",
+    "matched_callsign": "BAW117",
+    "dataset_revision": "d856ef1ed0fc492e8a3933ff4a938448ed008f66",
+    "retrieved_at": "2026-10-03T21:00:00.000Z",
+    "dataset_age_seconds": 3600,
+    "flight_instance_verified": false
+  },
+  "route_override": null,
+  "preferred_route": "route_reference",
+  "reason": "reference_match",
+  "geography_check": "not_checked"
+}

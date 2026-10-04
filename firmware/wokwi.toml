@@ -1,7 +1,7 @@
 [wokwi]
 version = 1
-firmware = '.pio/build/esp32dev/firmware.hex'
-elf = '.pio/build/esp32dev/firmware.elf'
+firmware = ".pio/build/wokwi/firmware.bin"
+elf = ".pio/build/wokwi/firmware.elf"
 
 # Forward http://localhost:8180 to port 80 on the simulated ESP32:
 [[net.forward]]

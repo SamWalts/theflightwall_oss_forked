@@ -1,0 +1,11 @@
+{
+  "operator_id": "airline:BAW",
+  "source_id": "logos",
+  "path": "/assets/logos/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.rgb565",
+  "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "width": 24,
+  "height": 24,
+  "format": "rgb565",
+  "byte_order": "big_endian",
+  "size_bytes": 1152
+}

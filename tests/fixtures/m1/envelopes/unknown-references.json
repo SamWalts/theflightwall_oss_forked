@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "instance_id": "00000000000000000000000000000001",
+  "sequence": 2,
+  "generated_at": "2026-10-03T22:00:00.100Z",
+  "receiver": {
+    "status": "ready",
+    "reason": "ok",
+    "source": "readsb_file",
+    "source_timestamp": 1791064800,
+    "snapshot_at": "2026-10-03T22:00:00.000Z",
+    "snapshot_age_ms": 100,
+    "progress_age_ms": 100,
+    "clock_confidence": "trusted_utc",
+    "last_success_at": "2026-10-03T22:00:00.050Z",
+    "last_success_age_ms": 50
+  },
+  "selection": {
+    "status": "ready",
+    "eligible_count": 1,
+    "returned_count": 1,
+    "truncated": false,
+    "truncation_reason": null
+  },
+  "reference_sources": [],
+  "flights": [
+    {
+      "adsb_icao": "A1B2C3",
+      "callsign_received": "BAW117  ",
+      "callsign_normalized": "BAW117",
+      "display_identifier": "BAW117",
+      "last_seen_at": "2026-10-03T21:59:59.600Z",
+      "position_seen_at": "2026-10-03T21:59:59.400Z",
+      "last_seen_age_ms": 500,
+      "position_seen_age_ms": 700,
+      "position": {
+        "latitude": 51.49,
+        "longitude": -0.1,
+        "distance_km": 1.78,
+        "bearing_deg": 128.8,
+        "source": "adsb"
+      },
+      "telemetry": {
+        "altitude_baro_ft": 30000,
+        "altitude_geom_ft": 30125,
+        "ground_speed_kt": 450,
+        "ground_track_deg": 295.7,
+        "airspeed_ias_kt": 280,
+        "airspeed_tas_kt": 470,
+        "vertical_speed_fpm": -640,
+        "vertical_speed_source": "barometric",
+        "ground_state": "unknown"
+      },
+      "aircraft": {
+        "registration": null,
+        "registered_owner": null,
+        "manufacturer": null,
+        "model": null,
+        "icao_type_designator": null,
+        "faa_classification": null,
+        "sources": {
+          "registration": null,
+          "registered_owner": null,
+          "manufacturer": null,
+          "model": null,
+          "icao_type_designator": null,
+          "faa_classification": null
+        }
+      },
+      "operator": {
+        "id": null,
+        "name": null,
+        "icao": null,
+        "iata": null,
+        "match_kind": "unknown",
+        "source_id": null,
+        "valid_for_ms": null
+      },
+      "logo": null,
+      "route_reference": null,
+      "route_override": null,
+      "preferred_route": null,
+      "route_reason": "reference_missing",
+      "observed_departure_airport": null,
+      "observed_arrival_airport": null,
+      "abbreviated_fields": []
+    }
+  ],
+  "diagnostics": {
+    "invalid_address_count": 0,
+    "expired_message_count": 0,
+    "expired_position_count": 0,
+    "missing_position_count": 0,
+    "filtered_count": 0,
+    "input_aircraft_count": 1,
+    "invalid_metric_count": 0,
+    "reference_error_count": 0
+  }
+}

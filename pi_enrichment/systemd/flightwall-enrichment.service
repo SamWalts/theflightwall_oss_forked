@@ -1,0 +1,17 @@
+[Unit]
+Description=FlightWall Pi Enrichment API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/theflightwall/pi_enrichment
+Environment=FAA_DB_PATH=/var/lib/flightwall/faa_registry.sqlite3
+Environment=TAR1090_AIRCRAFT_URL=http://127.0.0.1/tar1090/data/aircraft.json
+ExecStart=/usr/bin/python3 /opt/theflightwall/pi_enrichment/server.py --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

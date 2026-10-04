@@ -1,0 +1,2104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:flightwall:schema:flights:1",
+  "title": "FlightWall Pi-to-ESP32 flight feed v1 — M1 draft 0.1",
+  "description": "Draft producer schema. No production /v1/flights endpoint or ESP32 parser is implemented by this document. UTF-8 size, cross-field joins, source IDs and time semantics also require the human contract.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "instance_id": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32,
+      "pattern": "^[a-f0-9]{32}(?![\\s\\S])"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "generated_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "maxLength": 32,
+          "pattern": "Z(?![\\s\\S])"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "receiver": {
+      "$ref": "#/$defs/receiver"
+    },
+    "selection": {
+      "$ref": "#/$defs/selection"
+    },
+    "reference_sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/referenceSource"
+      },
+      "minItems": 0,
+      "maxItems": 8
+    },
+    "flights": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/flight"
+      },
+      "minItems": 0,
+      "maxItems": 8
+    },
+    "diagnostics": {
+      "type": "object",
+      "properties": {
+        "input_aircraft_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "invalid_address_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "missing_position_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "expired_position_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "expired_message_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "filtered_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "invalid_metric_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "reference_error_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "input_aircraft_count",
+        "invalid_address_count",
+        "missing_position_count",
+        "expired_position_count",
+        "expired_message_count",
+        "filtered_count",
+        "invalid_metric_count",
+        "reference_error_count"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "instance_id",
+    "sequence",
+    "generated_at",
+    "receiver",
+    "selection",
+    "reference_sources",
+    "flights",
+    "diagnostics"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "receiver": {
+            "properties": {
+              "status": {
+                "not": {
+                  "const": "ready"
+                }
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "receiver"
+        ]
+      },
+      "then": {
+        "properties": {
+          "flights": {
+            "maxItems": 0
+          },
+          "selection": {
+            "properties": {
+              "eligible_count": {
+                "const": 0
+              },
+              "returned_count": {
+                "const": 0
+              },
+              "truncated": {
+                "const": false
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "selection": {
+            "properties": {
+              "status": {
+                "const": "unconfigured"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "selection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "flights": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "receiver": {
+            "properties": {
+              "clock_confidence": {
+                "enum": [
+                  "same_host",
+                  "uncertain"
+                ]
+              }
+            },
+            "required": [
+              "clock_confidence"
+            ]
+          }
+        },
+        "required": [
+          "receiver"
+        ]
+      },
+      "then": {
+        "properties": {
+          "generated_at": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "receiver": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "initializing",
+            "ready",
+            "stale",
+            "unavailable",
+            "invalid"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "startup",
+            "awaiting_progress",
+            "ok",
+            "source_missing",
+            "source_unreadable",
+            "source_malformed",
+            "source_oversized",
+            "source_aircraft_limit",
+            "source_frozen",
+            "source_too_old",
+            "clock_recovery",
+            "invalid_source_time"
+          ]
+        },
+        "source": {
+          "enum": [
+            "readsb_file",
+            "readsb_loopback_http"
+          ]
+        },
+        "source_timestamp": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 253402300799
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 32,
+              "pattern": "Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "snapshot_age_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "progress_age_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clock_confidence": {
+          "enum": [
+            "trusted_utc",
+            "same_host",
+            "uncertain"
+          ]
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 32,
+              "pattern": "Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_success_age_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "reason",
+        "source",
+        "source_timestamp",
+        "snapshot_at",
+        "snapshot_age_ms",
+        "progress_age_ms",
+        "clock_confidence",
+        "last_success_at",
+        "last_success_age_ms"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "ready"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "const": "ok"
+              },
+              "source_timestamp": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 253402300799
+              },
+              "snapshot_age_ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4999
+              },
+              "progress_age_ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4999
+              },
+              "clock_confidence": {
+                "enum": [
+                  "trusted_utc",
+                  "same_host"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "clock_confidence": {
+                "enum": [
+                  "same_host",
+                  "uncertain"
+                ]
+              }
+            },
+            "required": [
+              "clock_confidence"
+            ]
+          },
+          "then": {
+            "properties": {
+              "snapshot_at": {
+                "type": "null"
+              },
+              "last_success_at": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "initializing"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "startup",
+                  "awaiting_progress",
+                  "clock_recovery"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "stale"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "source_frozen",
+                  "source_too_old"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unavailable"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "source_missing",
+                  "source_unreadable"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "invalid"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "source_malformed",
+                  "source_oversized",
+                  "source_aircraft_limit",
+                  "invalid_source_time"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "ready",
+            "unconfigured"
+          ]
+        },
+        "eligible_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 512
+        },
+        "returned_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "count_limit",
+                "byte_limit",
+                "count_and_byte_limit"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "eligible_count",
+        "returned_count",
+        "truncated",
+        "truncation_reason"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "truncated": {
+                "const": false
+              }
+            },
+            "required": [
+              "truncated"
+            ]
+          },
+          "then": {
+            "properties": {
+              "truncation_reason": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "truncation_reason": {
+                "enum": [
+                  "count_limit",
+                  "byte_limit",
+                  "count_and_byte_limit"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unconfigured"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "eligible_count": {
+                "const": 0
+              },
+              "returned_count": {
+                "const": 0
+              },
+              "truncated": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "referenceSource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8,
+          "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+        },
+        "kind": {
+          "enum": [
+            "aircraft_reference",
+            "airline_route_reference",
+            "logo_manifest",
+            "local_overrides",
+            "receiver_reference"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32,
+          "pattern": "^[a-z][a-z0-9_]{0,31}(?![\\s\\S])"
+        },
+        "generation": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retrieved_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 32,
+              "pattern": "Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "age_seconds": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "license_label": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 32,
+              "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "source",
+        "generation",
+        "revision",
+        "retrieved_at",
+        "age_seconds",
+        "license_label"
+      ],
+      "additionalProperties": false
+    },
+    "flight": {
+      "type": "object",
+      "properties": {
+        "adsb_icao": {
+          "type": "string",
+          "minLength": 6,
+          "maxLength": 6,
+          "pattern": "^[A-F0-9]{6}(?![\\s\\S])"
+        },
+        "callsign_received": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8,
+              "pattern": "^[ -~]{1,8}(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "callsign_normalized": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 7,
+              "pattern": "^(?:[A-Z]{2,3}|[A-Z][0-9]|[0-9][A-Z])(?:[0-9]{1,4}|[0-9]{1,3}[A-Z]|[0-9]{1,2}[A-Z]{2})(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display_identifier": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8,
+          "pattern": "^[!-~]{1,8}(?![\\s\\S])"
+        },
+        "last_seen_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 32,
+              "pattern": "Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "position_seen_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "maxLength": 32,
+              "pattern": "Z(?![\\s\\S])"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_seen_age_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14999
+        },
+        "position_seen_age_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 14999
+        },
+        "position": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "distance_km": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 20100
+            },
+            "bearing_deg": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 360
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "source": {
+              "enum": [
+                "adsb",
+                "adsr",
+                "tisb",
+                "mlat",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude",
+            "distance_km",
+            "bearing_deg",
+            "source"
+          ],
+          "additionalProperties": false
+        },
+        "telemetry": {
+          "type": "object",
+          "properties": {
+            "altitude_baro_ft": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -2000,
+                  "maximum": 100000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "altitude_geom_ft": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -2000,
+                  "maximum": 150000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ground_speed_kt": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ground_track_deg": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMaximum": 360
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "airspeed_ias_kt": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 2000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "airspeed_tas_kt": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 3000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "vertical_speed_fpm": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": -30000,
+                  "maximum": 30000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "vertical_speed_source": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "barometric",
+                    "geometric"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "ground_state": {
+              "enum": [
+                "airborne",
+                "ground",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "altitude_baro_ft",
+            "altitude_geom_ft",
+            "ground_speed_kt",
+            "ground_track_deg",
+            "airspeed_ias_kt",
+            "airspeed_tas_kt",
+            "vertical_speed_fpm",
+            "vertical_speed_source",
+            "ground_state"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "vertical_speed_fpm": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "vertical_speed_fpm"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "vertical_speed_source": {
+                    "type": "null"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "vertical_speed_source": {
+                    "enum": [
+                      "barometric",
+                      "geometric"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "ground_state": {
+                    "const": "ground"
+                  }
+                },
+                "required": [
+                  "ground_state"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "altitude_baro_ft": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "aircraft": {
+          "type": "object",
+          "properties": {
+            "registration": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 16,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "registered_owner": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "manufacturer": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "model": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 48,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "icao_type_designator": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 4,
+                  "pattern": "^[A-Z0-9]{2,4}(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "faa_classification": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8,
+                  "pattern": "^[A-Z0-9_-]{1,8}(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sources": {
+              "type": "object",
+              "properties": {
+                "registration": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8,
+                      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "registered_owner": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8,
+                      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "manufacturer": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8,
+                      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "model": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8,
+                      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "icao_type_designator": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8,
+                      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "faa_classification": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8,
+                      "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "registration",
+                "registered_owner",
+                "manufacturer",
+                "model",
+                "icao_type_designator",
+                "faa_classification"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "registration",
+            "registered_owner",
+            "manufacturer",
+            "model",
+            "icao_type_designator",
+            "faa_classification",
+            "sources"
+          ],
+          "additionalProperties": false
+        },
+        "operator": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 16,
+                  "pattern": "^airline:[A-Z0-9]{2,3}(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "icao": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 3,
+                  "pattern": "^[A-Z]{3}(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "iata": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2,
+                  "maxLength": 2,
+                  "pattern": "^[A-Z0-9]{2}(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "match_kind": {
+              "enum": [
+                "unknown",
+                "callsign_reference",
+                "dated_override"
+              ]
+            },
+            "source_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8,
+                  "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "valid_for_ms": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 86400000
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "icao",
+            "iata",
+            "match_kind",
+            "source_id",
+            "valid_for_ms"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "match_kind": {
+                    "const": "unknown"
+                  }
+                },
+                "required": [
+                  "match_kind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "id": {
+                    "type": "null"
+                  },
+                  "name": {
+                    "type": "null"
+                  },
+                  "icao": {
+                    "type": "null"
+                  },
+                  "iata": {
+                    "type": "null"
+                  },
+                  "source_id": {
+                    "type": "null"
+                  },
+                  "valid_for_ms": {
+                    "type": "null"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 16,
+                    "pattern": "^airline:[A-Z0-9]{2,3}(?![\\s\\S])"
+                  },
+                  "source_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8,
+                    "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "match_kind": {
+                    "const": "dated_override"
+                  }
+                },
+                "required": [
+                  "match_kind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "valid_for_ms": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 86400000
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "valid_for_ms": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "logo": {
+          "anyOf": [
+            {
+              "$ref": "urn:flightwall:schema:logo:1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route_reference": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "source_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8,
+                  "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                },
+                "matched_callsign": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 7,
+                  "pattern": "^(?:[A-Z]{2,3}|[A-Z][0-9]|[0-9][A-Z])(?:[0-9]{1,4}|[0-9]{1,3}[A-Z]|[0-9]{1,2}[A-Z]{2})(?![\\s\\S])"
+                },
+                "airport_codes": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "minItems": 2,
+                      "maxItems": 8
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stop_count": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 128
+                },
+                "sequence_omitted": {
+                  "type": "boolean"
+                },
+                "departure_airport": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "destination_airport": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "departure_display_code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "destination_display_code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current_leg_ambiguous": {
+                  "type": "boolean"
+                },
+                "flight_instance_verified": {
+                  "const": false
+                },
+                "kind": {
+                  "const": "reference"
+                },
+                "geography_check": {
+                  "enum": [
+                    "not_checked",
+                    "plausible",
+                    "rejected",
+                    "unknown_airport_coordinates"
+                  ]
+                }
+              },
+              "required": [
+                "source_id",
+                "matched_callsign",
+                "airport_codes",
+                "stop_count",
+                "sequence_omitted",
+                "departure_airport",
+                "destination_airport",
+                "departure_display_code",
+                "destination_display_code",
+                "current_leg_ambiguous",
+                "flight_instance_verified",
+                "kind",
+                "geography_check"
+              ],
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "stop_count": {
+                        "const": 2
+                      }
+                    },
+                    "required": [
+                      "stop_count"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "current_leg_ambiguous": {
+                        "const": false
+                      },
+                      "departure_airport": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "destination_airport": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "departure_display_code": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "destination_display_code": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "current_leg_ambiguous": {
+                        "const": true
+                      },
+                      "departure_airport": {
+                        "type": "null"
+                      },
+                      "destination_airport": {
+                        "type": "null"
+                      },
+                      "departure_display_code": {
+                        "type": "null"
+                      },
+                      "destination_display_code": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "stop_count": {
+                        "minimum": 9
+                      }
+                    },
+                    "required": [
+                      "stop_count"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "sequence_omitted": {
+                        "const": true
+                      },
+                      "airport_codes": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "sequence_omitted": {
+                        "const": false
+                      },
+                      "airport_codes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 4,
+                          "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                        },
+                        "minItems": 2,
+                        "maxItems": 8
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route_override": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "source_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8,
+                  "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                },
+                "matched_callsign": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 7,
+                  "pattern": "^(?:[A-Z]{2,3}|[A-Z][0-9]|[0-9][A-Z])(?:[0-9]{1,4}|[0-9]{1,3}[A-Z]|[0-9]{1,2}[A-Z]{2})(?![\\s\\S])"
+                },
+                "airport_codes": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "minItems": 2,
+                      "maxItems": 8
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "stop_count": {
+                  "type": "integer",
+                  "minimum": 2,
+                  "maximum": 128
+                },
+                "sequence_omitted": {
+                  "type": "boolean"
+                },
+                "departure_airport": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "destination_airport": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "departure_display_code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "destination_display_code": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 3,
+                      "maxLength": 4,
+                      "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "current_leg_ambiguous": {
+                  "type": "boolean"
+                },
+                "flight_instance_verified": {
+                  "type": "boolean"
+                },
+                "kind": {
+                  "const": "dated_override"
+                },
+                "source_label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                "flight_date": {
+                  "type": "string",
+                  "format": "date",
+                  "minLength": 10,
+                  "maxLength": 10
+                },
+                "valid_from": {
+                  "type": "string",
+                  "format": "date-time",
+                  "maxLength": 32,
+                  "pattern": "Z(?![\\s\\S])"
+                },
+                "valid_until": {
+                  "type": "string",
+                  "format": "date-time",
+                  "maxLength": 32,
+                  "pattern": "Z(?![\\s\\S])"
+                },
+                "remaining_validity_ms": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 86400000
+                },
+                "aircraft_hex": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 6,
+                      "maxLength": 6,
+                      "pattern": "^[A-F0-9]{6}(?![\\s\\S])"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "evidence_excerpt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 96,
+                  "pattern": "^[^\\u0000-\\u001F\\u007F]*(?![\\s\\S])"
+                },
+                "evidence_truncated": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "source_id",
+                "matched_callsign",
+                "airport_codes",
+                "stop_count",
+                "sequence_omitted",
+                "departure_airport",
+                "destination_airport",
+                "departure_display_code",
+                "destination_display_code",
+                "current_leg_ambiguous",
+                "flight_instance_verified",
+                "kind",
+                "source_label",
+                "flight_date",
+                "valid_from",
+                "valid_until",
+                "remaining_validity_ms",
+                "aircraft_hex",
+                "evidence_excerpt",
+                "evidence_truncated"
+              ],
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "stop_count": {
+                        "const": 2
+                      }
+                    },
+                    "required": [
+                      "stop_count"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "current_leg_ambiguous": {
+                        "const": false
+                      },
+                      "departure_airport": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "destination_airport": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "departure_display_code": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      },
+                      "destination_display_code": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 4,
+                        "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "current_leg_ambiguous": {
+                        "const": true
+                      },
+                      "departure_airport": {
+                        "type": "null"
+                      },
+                      "destination_airport": {
+                        "type": "null"
+                      },
+                      "departure_display_code": {
+                        "type": "null"
+                      },
+                      "destination_display_code": {
+                        "type": "null"
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "stop_count": {
+                        "minimum": 9
+                      }
+                    },
+                    "required": [
+                      "stop_count"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "sequence_omitted": {
+                        "const": true
+                      },
+                      "airport_codes": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "else": {
+                    "properties": {
+                      "sequence_omitted": {
+                        "const": false
+                      },
+                      "airport_codes": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 4,
+                          "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                        },
+                        "minItems": 2,
+                        "maxItems": 8
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "flight_instance_verified": {
+                        "const": true
+                      }
+                    },
+                    "required": [
+                      "flight_instance_verified"
+                    ]
+                  },
+                  "then": {
+                    "properties": {
+                      "aircraft_hex": {
+                        "type": "string",
+                        "minLength": 6,
+                        "maxLength": 6,
+                        "pattern": "^[A-F0-9]{6}(?![\\s\\S])"
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "preferred_route": {
+          "anyOf": [
+            {
+              "enum": [
+                "route_reference",
+                "route_override"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "route_reason": {
+          "enum": [
+            "reference_missing",
+            "reference_invalid",
+            "invalid_or_registration_callsign",
+            "unknown_airline_prefix",
+            "ambiguous_airline_alias",
+            "no_route_match",
+            "reference_match",
+            "route_geography_rejected",
+            "missing_airport_reference",
+            "dated_override_match"
+          ]
+        },
+        "observed_departure_airport": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "airport_code": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 4,
+                  "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                },
+                "event_id": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[a-f0-9]{32}(?![\\s\\S])"
+                },
+                "source_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8,
+                  "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "maxLength": 32,
+                  "pattern": "Z(?![\\s\\S])"
+                },
+                "confidence": {
+                  "enum": [
+                    "medium",
+                    "high"
+                  ]
+                }
+              },
+              "required": [
+                "airport_code",
+                "event_id",
+                "source_id",
+                "observed_at",
+                "confidence"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observed_arrival_airport": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "airport_code": {
+                  "type": "string",
+                  "minLength": 3,
+                  "maxLength": 4,
+                  "pattern": "^[A-Z0-9]{3,4}(?![\\s\\S])"
+                },
+                "event_id": {
+                  "type": "string",
+                  "minLength": 32,
+                  "maxLength": 32,
+                  "pattern": "^[a-f0-9]{32}(?![\\s\\S])"
+                },
+                "source_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8,
+                  "pattern": "^[a-z][a-z0-9_]{0,7}(?![\\s\\S])"
+                },
+                "observed_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "maxLength": 32,
+                  "pattern": "Z(?![\\s\\S])"
+                },
+                "confidence": {
+                  "enum": [
+                    "medium",
+                    "high"
+                  ]
+                }
+              },
+              "required": [
+                "airport_code",
+                "event_id",
+                "source_id",
+                "observed_at",
+                "confidence"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "abbreviated_fields": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "aircraft.registered_owner",
+              "aircraft.manufacturer",
+              "aircraft.model",
+              "operator.name"
+            ]
+          },
+          "maxItems": 4,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "adsb_icao",
+        "callsign_received",
+        "callsign_normalized",
+        "display_identifier",
+        "last_seen_at",
+        "position_seen_at",
+        "last_seen_age_ms",
+        "position_seen_age_ms",
+        "position",
+        "telemetry",
+        "aircraft",
+        "operator",
+        "logo",
+        "route_reference",
+        "route_override",
+        "preferred_route",
+        "route_reason",
+        "observed_departure_airport",
+        "observed_arrival_airport",
+        "abbreviated_fields"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

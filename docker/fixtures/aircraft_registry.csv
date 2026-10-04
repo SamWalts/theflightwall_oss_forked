@@ -1,0 +1,4 @@
+adsb_icao,registration,operator,operator_icao,model,aircraft_type
+A1B2C3,N123AB,TEST UNITED,UAL,737-800,L
+A4B5C6,N456CD,TEST DELTA,DAL,A320,L
+A7B8C9,N789EF,TEST SOUTHWEST,SWA,737-700,L

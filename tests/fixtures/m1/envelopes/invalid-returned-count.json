@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "instance_id": "00000000000000000000000000000001",
+  "sequence": 2,
+  "generated_at": "2026-10-03T22:00:00.100Z",
+  "receiver": {
+    "status": "ready",
+    "reason": "ok",
+    "source": "readsb_file",
+    "source_timestamp": 1791064800,
+    "snapshot_at": "2026-10-03T22:00:00.000Z",
+    "snapshot_age_ms": 100,
+    "progress_age_ms": 100,
+    "clock_confidence": "trusted_utc",
+    "last_success_at": "2026-10-03T22:00:00.050Z",
+    "last_success_age_ms": 50
+  },
+  "selection": {
+    "status": "ready",
+    "eligible_count": 1,
+    "returned_count": 2,
+    "truncated": false,
+    "truncation_reason": null
+  },
+  "reference_sources": [
+    {
+      "id": "fixture",
+      "kind": "aircraft_reference",
+      "source": "synthetic_fixture",
+      "generation": "synthetic-v1",
+      "revision": "fixture-v1",
+      "retrieved_at": "2026-10-03T21:00:00.000Z",
+      "age_seconds": 3600,
+      "license_label": "CC0-1.0"
+    },
+    {
+      "id": "vrs",
+      "kind": "airline_route_reference",
+      "source": "vrs_standing_data",
+      "generation": "d856ef1ed0fc-00000000000000000000000000000001",
+      "revision": "d856ef1ed0fc492e8a3933ff4a938448ed008f66",
+      "retrieved_at": "2026-10-03T21:00:00.000Z",
+      "age_seconds": 3600,
+      "license_label": "CC0-1.0"
+    },
+    {
+      "id": "logos",
+      "kind": "logo_manifest",
+      "source": "synthetic_logo_metadata",
+      "generation": "synthetic-v1",
+      "revision": "fixture-v1",
+      "retrieved_at": "2026-10-03T21:00:00.000Z",
+      "age_seconds": 3600,
+      "license_label": "fixture-only"
+    }
+  ],
+  "flights": [
+    {
+      "adsb_icao": "A1B2C3",
+      "callsign_received": "BAW117  ",
+      "callsign_normalized": "BAW117",
+      "display_identifier": "BAW117",
+      "last_seen_at": "2026-10-03T21:59:59.600Z",
+      "position_seen_at": "2026-10-03T21:59:59.400Z",
+      "last_seen_age_ms": 500,
+      "position_seen_age_ms": 700,
+      "position": {
+        "latitude": 51.49,
+        "longitude": -0.1,
+        "distance_km": 1.78,
+        "bearing_deg": 128.8,
+        "source": "adsb"
+      },
+      "telemetry": {
+        "altitude_baro_ft": 30000,
+        "altitude_geom_ft": 30125,
+        "ground_speed_kt": 450,
+        "ground_track_deg": 295.7,
+        "airspeed_ias_kt": 280,
+        "airspeed_tas_kt": 470,
+        "vertical_speed_fpm": -640,
+        "vertical_speed_source": "barometric",
+        "ground_state": "unknown"
+      },
+      "aircraft": {
+        "registration": "TEST-REG",
+        "registered_owner": "EXAMPLE OWNER",
+        "manufacturer": "EXAMPLE MAKER",
+        "model": "EXAMPLE MODEL",
+        "icao_type_designator": "B77W",
+        "faa_classification": "4",
+        "sources": {
+          "registration": "fixture",
+          "registered_owner": "fixture",
+          "manufacturer": "fixture",
+          "model": "fixture",
+          "icao_type_designator": "fixture",
+          "faa_classification": "fixture"
+        }
+      },
+      "operator": {
+        "id": "airline:BAW",
+        "name": "British Airways",
+        "icao": "BAW",
+        "iata": "BA",
+        "match_kind": "callsign_reference",
+        "source_id": "vrs",
+        "valid_for_ms": null
+      },
+      "logo": {
+        "operator_id": "airline:BAW",
+        "source_id": "logos",
+        "path": "/assets/logos/ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.rgb565",
+        "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "width": 24,
+        "height": 24,
+        "format": "rgb565",
+        "byte_order": "big_endian",
+        "size_bytes": 1152
+      },
+      "route_reference": {
+        "source_id": "vrs",
+        "matched_callsign": "BAW117",
+        "airport_codes": [
+          "EGLL",
+          "KJFK"
+        ],
+        "stop_count": 2,
+        "sequence_omitted": false,
+        "departure_airport": "EGLL",
+        "destination_airport": "KJFK",
+        "departure_display_code": "LHR",
+        "destination_display_code": "JFK",
+        "current_leg_ambiguous": false,
+        "flight_instance_verified": false,
+        "kind": "reference",
+        "geography_check": "not_checked"
+      },
+      "route_override": null,
+      "preferred_route": "route_reference",
+      "route_reason": "reference_match",
+      "observed_departure_airport": null,
+      "observed_arrival_airport": null,
+      "abbreviated_fields": []
+    }
+  ],
+  "diagnostics": {
+    "invalid_address_count": 0,
+    "expired_message_count": 0,
+    "expired_position_count": 0,
+    "missing_position_count": 0,
+    "filtered_count": 0,
+    "input_aircraft_count": 1,
+    "invalid_metric_count": 0,
+    "reference_error_count": 0
+  }
+}

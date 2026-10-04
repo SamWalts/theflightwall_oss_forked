@@ -1,0 +1,24 @@
+{
+  "now": 1791064794,
+  "messages": 100,
+  "aircraft": [
+    {
+      "hex": "a1b2c3",
+      "type": "adsb_icao",
+      "flight": "BAW117  ",
+      "lat": 51.49,
+      "lon": -0.1,
+      "alt_baro": 30000,
+      "alt_geom": 30125,
+      "gs": 450,
+      "ias": 280,
+      "tas": 470,
+      "track": 295.7,
+      "baro_rate": -640,
+      "seen": 0.4,
+      "seen_pos": 0.6,
+      "messages": 100,
+      "rssi": -20
+    }
+  ]
+}
